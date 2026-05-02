@@ -18,57 +18,29 @@
 
   <main id="history-page">
 
-    <!-- ============================================================
-         INTESTAZIONE + FILTRI
-         Permette di filtrare per intervallo di date o gruppo
-         muscolare. Di default mostra le ultime 30 sessioni.
-         ============================================================ -->
-    <header id="history-header">
-      <!-- TODO: titolo "Storico sessioni" -->
-      <!-- TODO: filtro per data (settimana / mese / tutto) -->
-      <!-- TODO: filtro per gruppo muscolare -->
-    </header>
+    <h1 class="page-title">Storico</h1>
 
-    <!-- ============================================================
-         CALENDARIO / HEATMAP
-         Vista mensile che mostra i giorni con sessioni registrate,
-         colorate per volume o intensità.
-         ============================================================ -->
-    <section id="session-calendar">
-      <!-- TODO: griglia giorni del mese -->
-      <!-- TODO: punto/dot colorato sui giorni con sessioni -->
-      <!-- TODO: click su giorno → scroll alla sessione corrispondente -->
-    </section>
+    <!-- Filtro periodo -->
+    <div class="filter-pills" id="filter-pills">
+      <button class="filter-pill" data-filter="7d">7 giorni</button>
+      <button class="filter-pill" data-filter="30d">30 giorni</button>
+      <button class="filter-pill active" data-filter="all">Tutto</button>
+    </div>
 
-    <!-- ============================================================
-         LISTA SESSIONI
-         Ogni sessione è una card con:
-         - Data e ora di inizio
-         - Durata totale
-         - Lista esercizi (collassabile)
-         - Volume totale della sessione
-         ============================================================ -->
+    <!-- Mini calendario mensile -->
+    <div class="calendar-section">
+      <div id="calendar-container"></div>
+    </div>
+
+    <!-- Lista sessioni -->
     <section id="session-list">
-      <!-- TODO: generata dinamicamente da Firestore -->
-      <!-- TODO: ordinata per data decrescente -->
-      <!-- TODO: paginazione o infinite scroll -->
-
-      <!-- Struttura card singola sessione (da replicare in JS):
-      <article class="session-card">
-        <header>
-          <span class="session-date">Lunedì 28 apr 2025 · 07:15</span>
-          <span class="session-duration">42 min</span>
-        </header>
-        <ul class="exercise-summary">
-          (esercizi...)
-        </ul>
-        <footer>
-          <span>Volume: 1.240 kg</span>
-          <button class="btn-delete">Elimina</button>
-        </footer>
-      </article>
-      -->
+      <!-- Generata da history.js -->
     </section>
+
+    <!-- Carica altro -->
+    <div style="text-align:center; padding: 8px 0 16px;">
+      <button id="btn-load-more" class="btn btn-ghost hidden">Carica sessioni precedenti</button>
+    </div>
 
   </main>
 

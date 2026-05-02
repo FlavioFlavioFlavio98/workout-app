@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workout App — Statistiche</title>
   <link rel="stylesheet" href="css/style.css" />
-  <!-- Chart.js per i grafici -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -20,76 +19,67 @@
 
   <main id="stats-page">
 
-    <!-- ============================================================
-         FILTRO PERIODO
-         Selettore per il range temporale dei grafici:
-         Ultima settimana / Ultimo mese / Ultimi 3 mesi / Tutto
-         ============================================================ -->
-    <section id="period-filter">
-      <!-- TODO: toggle buttons settimana / mese / 3 mesi / tutto -->
-    </section>
+    <h1 class="page-title">Statistiche</h1>
 
-    <!-- ============================================================
-         CARD METRICHE GLOBALI
-         Numeri in evidenza: sessioni totali, volume totale,
-         media sessioni/settimana, esercizi unici eseguiti
-         ============================================================ -->
-    <section id="global-metrics">
-      <!-- TODO: 4 card KPI -->
-    </section>
+    <!-- Filtro periodo -->
+    <div class="filter-pills">
+      <button class="filter-pill" data-period="7">7 giorni</button>
+      <button class="filter-pill active" data-period="30">30 giorni</button>
+      <button class="filter-pill" data-period="90">3 mesi</button>
+      <button class="filter-pill" data-period="0">Tutto</button>
+    </div>
 
-    <!-- ============================================================
-         GRAFICO VOLUME NEL TEMPO
-         Linea o barre per volume totale (kg) per sessione.
-         Asse X: date, Asse Y: kg sollevati.
-         ============================================================ -->
-    <section id="chart-volume">
-      <h2>Volume nel tempo</h2>
-      <canvas id="volumeChart"></canvas>
-      <!-- TODO: js/stats.js costruisce il dataset da Firestore -->
-    </section>
+    <!-- KPI globali -->
+    <div class="kpi-row" id="kpi-row">
+      <div class="kpi-card"><div class="kpi-value" id="kpi-sessions">—</div><div class="kpi-label">Sessioni</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="kpi-volume">—</div><div class="kpi-label">Volume kg</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="kpi-freq">—</div><div class="kpi-label">Sess/sett</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="kpi-sets">—</div><div class="kpi-label">Serie tot</div></div>
+    </div>
 
-    <!-- ============================================================
-         GRAFICO FREQUENZA PER GRUPPO MUSCOLARE
-         Donut/pie chart: quante sessioni per ogni gruppo muscolare
-         nel periodo selezionato.
-         ============================================================ -->
-    <section id="chart-muscle-frequency">
-      <h2>Frequenza per gruppo muscolare</h2>
-      <canvas id="muscleChart"></canvas>
-    </section>
+    <!-- Volume nel tempo -->
+    <div class="stats-section">
+      <div class="stats-section-title">Volume per sessione (kg)</div>
+      <div class="chart-wrapper" style="height:180px;">
+        <canvas id="chart-volume"></canvas>
+      </div>
+    </div>
 
-    <!-- ============================================================
-         GRAFICO PROGRESSIONE ESERCIZIO
-         Seleziona un esercizio dalla libreria e mostra:
-         - Peso massimo per sessione nel tempo
-         - Volume per sessione nel tempo
-         ============================================================ -->
-    <section id="chart-exercise-progress">
-      <h2>Progressione esercizio</h2>
-      <!-- TODO: select per scegliere esercizio -->
-      <canvas id="progressChart"></canvas>
-    </section>
+    <!-- Gruppi muscolari -->
+    <div class="stats-section">
+      <div class="stats-section-title">Gruppi muscolari più allenati</div>
+      <div id="muscle-bars"></div>
+    </div>
 
-    <!-- ============================================================
-         PERSONAL RECORD
-         Tabella con il PR (peso max, reps max, volume max)
-         per ogni esercizio eseguito almeno una volta.
-         ============================================================ -->
-    <section id="personal-records">
-      <h2>Personal Record</h2>
-      <!-- TODO: tabella ordinabile per nome / data / valore -->
-    </section>
+    <!-- Personal Record -->
+    <div class="stats-section">
+      <div class="stats-section-title">Personal Record</div>
+      <div id="pr-list">
+        <div class="loading-state" style="padding:20px 0;">Caricamento...</div>
+      </div>
+    </div>
 
-    <!-- ============================================================
-         GRAFICO RPE MEDIO
-         Mostra la difficoltà percepita media per sessione:
-         utile per capire andamento fatica e recupero.
-         ============================================================ -->
-    <section id="chart-rpe">
-      <h2>Difficoltà percepita (RPE medio)</h2>
-      <canvas id="rpeChart"></canvas>
-    </section>
+    <!-- Progressione esercizio -->
+    <div class="stats-section">
+      <div class="stats-section-title">Progressione esercizio</div>
+      <select class="stats-select" id="progress-select">
+        <option value="">Seleziona un esercizio...</option>
+      </select>
+      <div class="chart-wrapper" style="height:180px;">
+        <canvas id="chart-progress"></canvas>
+      </div>
+      <p id="progress-empty" class="text-muted" style="font-size:13px;text-align:center;padding:12px 0;">
+        Seleziona un esercizio per vedere la progressione
+      </p>
+    </div>
+
+    <!-- RPE medio -->
+    <div class="stats-section">
+      <div class="stats-section-title">Difficoltà percepita media (RPE)</div>
+      <div class="chart-wrapper" style="height:160px;">
+        <canvas id="chart-rpe"></canvas>
+      </div>
+    </div>
 
   </main>
 

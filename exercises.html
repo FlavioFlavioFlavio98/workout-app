@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Workout App — Libreria Esercizi</title>
+  <title>Workout App — Esercizi</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -18,71 +18,85 @@
 
   <main id="exercises-page">
 
-    <!-- ============================================================
-         INTESTAZIONE + RICERCA
-         Barra di ricerca per nome esercizio.
-         Filtri: tipo attrezzatura (corpo libero / banda / kettlebell)
-                 e gruppo muscolare.
-         ============================================================ -->
-    <header id="exercises-header">
-      <!-- TODO: input ricerca testuale -->
-      <!-- TODO: chip/toggle filtro tipo attrezzatura -->
-      <!-- TODO: chip/toggle filtro gruppo muscolare -->
-    </header>
+    <h1 class="page-title">Libreria Esercizi</h1>
 
-    <!-- ============================================================
-         PULSANTE AGGIUNGI ESERCIZIO
-         Apre il form/modal per creare un nuovo esercizio
-         nella libreria personale.
-         ============================================================ -->
-    <section id="add-exercise-cta">
-      <!-- TODO: bottone "+ Nuovo esercizio" -->
-    </section>
+    <!-- Ricerca -->
+    <div class="field" style="margin-bottom:12px;">
+      <input type="text" id="ex-search" placeholder="Cerca esercizio..." autocomplete="off" />
+    </div>
 
-    <!-- ============================================================
-         GRIGLIA / LISTA ESERCIZI
-         Ogni card mostra:
-         - Nome esercizio
-         - Gruppo muscolare (badge colorato)
-         - Tipo attrezzatura (icona)
-         - Ultimo PR
-         - Pulsanti: Modifica / Elimina / Vedi progressione
-         ============================================================ -->
+    <!-- Filtri tipo attrezzatura -->
+    <div class="filter-pills" id="type-filters" style="margin-bottom:10px;">
+      <button class="filter-pill active" data-type="">Tutti</button>
+      <button class="filter-pill" data-type="bodyweight">🏃 Corpo libero</button>
+      <button class="filter-pill" data-type="band">↔️ Banda</button>
+      <button class="filter-pill" data-type="kettlebell">🏋️ Kettlebell</button>
+    </div>
+
+    <!-- Lista esercizi -->
     <section id="exercise-grid">
-      <!-- TODO: generata dinamicamente da Firestore (collezione exercises/) -->
-
-      <!-- Struttura card singolo esercizio (da replicare in JS):
-      <article class="exercise-card">
-        <header>
-          <span class="exercise-name">Push-up</span>
-          <span class="badge badge-chest">Petto</span>
-        </header>
-        <p class="exercise-type">Corpo libero</p>
-        <p class="exercise-pr">PR: 3×20</p>
-        <p class="exercise-notes">Note progressione...</p>
-        <footer>
-          <button class="btn-edit">Modifica</button>
-          <button class="btn-progress">Progressione</button>
-          <button class="btn-delete">Elimina</button>
-        </footer>
-      </article>
-      -->
+      <div class="loading-state">Caricamento...</div>
     </section>
-
-    <!-- ============================================================
-         MODAL / FORM CREAZIONE-MODIFICA ESERCIZIO
-         Nascosto di default, appare al click su "Nuovo esercizio"
-         o "Modifica". Campi:
-         - Nome (testo)
-         - Gruppo muscolare (select)
-         - Tipo attrezzatura (radio)
-         - Note sulla progressione (textarea)
-         ============================================================ -->
-    <dialog id="exercise-modal">
-      <!-- TODO: form con i campi sopra, pulsanti Salva / Annulla -->
-    </dialog>
 
   </main>
+
+  <!-- FAB: aggiungi esercizio -->
+  <button id="btn-new-ex" aria-label="Nuovo esercizio" style="
+    position:fixed; bottom:calc(var(--nav-h) + 14px); right:16px;
+    width:56px; height:56px; border-radius:50%;
+    background:var(--success); color:#0f1117;
+    font-size:28px; border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 20px rgba(79,201,122,0.45);
+    z-index:50; -webkit-tap-highlight-color:transparent;">+</button>
+
+  <!-- Modal crea / modifica esercizio -->
+  <dialog id="modal-exercise">
+    <div class="modal-header">
+      <h2 id="modal-ex-title">Nuovo esercizio</h2>
+      <button class="btn-close-modal" id="btn-close-ex">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="ex-edit-id" />
+
+      <div class="field">
+        <label for="ex-name">Nome esercizio</label>
+        <input type="text" id="ex-name" placeholder="es. Push-up, Squat, Swing..." />
+      </div>
+
+      <div class="field">
+        <label for="ex-muscle">Gruppo muscolare</label>
+        <select id="ex-muscle">
+          <option value="">Seleziona...</option>
+          <option value="petto">Petto</option>
+          <option value="schiena">Schiena</option>
+          <option value="spalle">Spalle</option>
+          <option value="bicipiti">Bicipiti</option>
+          <option value="tricipiti">Tricipiti</option>
+          <option value="core">Core</option>
+          <option value="gambe">Gambe</option>
+          <option value="glutei">Glutei</option>
+          <option value="full body">Full body</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Attrezzatura</label>
+        <div class="radio-group">
+          <div class="radio-pill"><input type="radio" name="ex-type" id="ex-bw"   value="bodyweight" checked /><label for="ex-bw">🏃 Corpo libero</label></div>
+          <div class="radio-pill"><input type="radio" name="ex-type" id="ex-band" value="band" /><label for="ex-band">↔️ Banda</label></div>
+          <div class="radio-pill"><input type="radio" name="ex-type" id="ex-kb"   value="kettlebell" /><label for="ex-kb">🏋️ Kettlebell</label></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="ex-notes">Note progressione (opz.)</label>
+        <textarea id="ex-notes" placeholder="es. Aumenta prima le reps, poi aggiungi peso. Focus sull'esplosività..."></textarea>
+      </div>
+
+      <button class="btn btn-primary btn-full" id="btn-save-ex">Salva esercizio</button>
+    </div>
+  </dialog>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>

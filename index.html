@@ -3,16 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Workout App — Dashboard</title>
+  <title>Workout App</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
-  <!-- ============================================================
-       NAVIGAZIONE PRINCIPALE
-       Nav bar fissa in basso con 5 voci:
-       Dashboard | Sessione | Storico | Stats | Esercizi
-       ============================================================ -->
   <nav id="main-nav">
     <a href="index.html"     class="nav-item active"><span class="nav-icon">🏠</span><span>Home</span></a>
     <a href="session.html"   class="nav-item"><span class="nav-icon">▶️</span><span>Sessione</span></a>
@@ -23,63 +18,65 @@
 
   <main id="dashboard">
 
-    <!-- ============================================================
-         HEADER
-         Saluto dinamico (Buongiorno / Buonasera) + data odierna
-         ============================================================ -->
-    <header id="dashboard-header">
-      <!-- TODO: testo "Buongiorno, Flavio" + data -->
-    </header>
+    <!-- Saluto + data -->
+    <p class="greeting" id="greeting">Ciao!</p>
+    <p class="greeting-sub" id="greeting-sub">—</p>
 
-    <!-- ============================================================
-         RIEPILOGO RAPIDO OGGI
-         Mostra quante sessioni già fatte oggi e volume totale
-         ============================================================ -->
-    <section id="today-summary">
-      <!-- TODO: numero sessioni oggi, durata totale, volume totale (kg) -->
-    </section>
+    <!-- CTA principale -->
+    <a href="session.html" class="dash-cta" id="dash-cta">
+      <span class="dash-cta-label" id="cta-label">Inizia la sessione</span>
+      <span class="dash-cta-timer" id="cta-sub">▶ Allenati ora</span>
+    </a>
 
-    <!-- ============================================================
-         BOTTONE AVVIA SESSIONE
-         CTA principale — porta a session.html
-         ============================================================ -->
-    <section id="start-session">
-      <!-- TODO: bottone grande "Inizia sessione", eventuale sessione in corso -->
-    </section>
+    <!-- Sessioni di oggi -->
+    <div class="kpi-row" id="today-row" style="display:none;">
+      <div class="kpi-card"><div class="kpi-value" id="td-sessions">0</div><div class="kpi-label">Oggi</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="td-volume">0</div><div class="kpi-label">Volume kg</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="td-duration">0</div><div class="kpi-label">Min totali</div></div>
+    </div>
 
-    <!-- ============================================================
-         STREAK & MOTIVAZIONE
-         Striscia di allenamenti consecutivi (giorni)
-         ============================================================ -->
-    <section id="streak">
-      <!-- TODO: contatore giorni consecutivi, badge milestone -->
-    </section>
+    <!-- Streak -->
+    <div class="streak-card" id="streak-card">
+      <span class="streak-icon">🔥</span>
+      <div>
+        <div class="streak-count" id="streak-count">—</div>
+        <div class="streak-label">giorni consecutivi</div>
+      </div>
+      <div style="margin-left:auto; text-align:right;">
+        <div style="font-size:13px; color:var(--muted);" id="streak-last">—</div>
+      </div>
+    </div>
 
-    <!-- ============================================================
-         ULTIMI PERSONAL RECORD
-         Mostra gli ultimi 3 PR aggiornati
-         ============================================================ -->
-    <section id="recent-records">
-      <!-- TODO: lista PR con nome esercizio, valore, data -->
-    </section>
+    <!-- Ultima sessione -->
+    <div class="last-session-card" id="last-session-card">
+      <div class="last-session-title">Ultima sessione</div>
+      <div id="last-session-content">
+        <p class="text-muted" style="font-size:14px;">Nessuna sessione trovata</p>
+      </div>
+    </div>
 
-    <!-- ============================================================
-         ANTEPRIMA PROSSIMA SESSIONE
-         Suggerisce quale gruppo muscolare allenare oggi
-         basandosi sulla frequenza e sull'ultimo allenamento
-         ============================================================ -->
-    <section id="next-session-hint">
-      <!-- TODO: logica "Ultimo allenamento X giorni fa per [gruppo]" -->
-    </section>
+    <!-- Gruppi muscolari allenati di recente -->
+    <div class="last-session-card" id="recent-muscles-card">
+      <div class="last-session-title">Ultimi 7 giorni</div>
+      <div class="quick-muscles" id="recent-muscles">
+        <span class="text-muted" style="font-size:13px;">—</span>
+      </div>
+    </div>
+
+    <!-- Ultimi PR -->
+    <div class="last-session-card" id="recent-pr-card">
+      <div class="last-session-title">Personal Record recenti</div>
+      <div id="recent-pr-list">
+        <p class="text-muted" style="font-size:13px;">Nessun record ancora</p>
+      </div>
+    </div>
 
   </main>
 
-  <!-- Firebase SDK (versione compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <script src="js/firebase-config.js"></script>
-
-  <!-- TODO: script dashboard inline o file js/dashboard.js -->
+  <script src="js/dashboard.js"></script>
 
 </body>
 </html>
