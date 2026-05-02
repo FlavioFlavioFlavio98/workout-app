@@ -21,19 +21,27 @@ const state = {
     isActive:         false
   },
   addExercise: {
-    selected: null,
-    rpe:      3
+    selected:  null,
+    rpe:       'medio',
+    bandColor: null
   },
   addSet: {
     exerciseIndex: null,
-    rpe:           3
+    rpe:           'medio',
+    bandColor:     null
   },
   exerciseCache: null,
   recordsCache:  {}    // { exerciseId: { maxWeight, maxReps, bestVolume } }
 };
 
+// Band colors map (shared with buildCard display)
+const BAND_COLORS = { giallo:'#FFD700', verde:'#3DBE29', rosso:'#E53935', blu:'#1E88E5', viola:'#8E24AA', nero:'#2A2A2A' };
+
 // Quick-add recent exercises cache
 const quickAdd = { recent: null };
+
+// Wake Lock
+const wakeLock = { sentinel: null };
 
 // Audio voice note state
 const audio = {
@@ -101,6 +109,26 @@ function calcVolume() {
 function totalSets() {
   return state.session.exercises.reduce((t, ex) => t + ex.sets.length, 0);
 }
+
+// ============================================================
+//  WAKE LOCK
+// ============================================================
+async function requestWakeLock() {
+  if (!('wakeLock' in navigator)) return;
+  try {
+    wakeLock.sentinel = await navigator.wakeLock.request('screen');
+    wakeLock.sentinel.addEventListener('release', () => { wakeLock.sentinel = null; });
+  } catch (_) {}
+}
+
+function releaseWakeLock() {
+  wakeLock.sentinel?.release().catch(() => {});
+  wakeLock.sentinel = null;
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && state.session.isActive) requestWakeLock();
+});
 
 // ============================================================
 //  BEEP + VIBRAZIONE
@@ -427,6 +455,7 @@ async function startSession() {
   elStatus.textContent = 'Sessione in corso…';
 
   startSessionTimer();
+  requestWakeLock();
 }
 
 function requestStop() {
@@ -460,6 +489,7 @@ async function confirmStop() {
   modalStop.close();
   clearInterval(state.timer.intervalId);
   stopRest();
+  releaseWakeLock();
 
   const endTime  = new Date();
   const payload  = {
@@ -545,14 +575,22 @@ function buildCard(ex, idx) {
   const card = document.createElement('article');
   card.className = 'exercise-card';
 
-  const rows = ex.sets.map((s, si) => `
+  const rows = ex.sets.map((s, si) => {
+    const rpeEmoji = typeof s.rpe === 'string'
+      ? { facile:'🟢', medio:'🟡', duro:'🔴' }[s.rpe] || ''
+      : ['','🟢','🟢','🟡','🔴','🔴'][s.rpe] || '';
+    const bandDot  = s.bandColor
+      ? `<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${BAND_COLORS[s.bandColor]||'#888'};margin-left:3px;vertical-align:middle;"></span>`
+      : '';
+    return `
     <tr>
       <td class="set-num">${si + 1}</td>
       <td>${s.reps} rip</td>
-      <td>${s.weight > 0 ? s.weight + ' kg' : '—'}</td>
-      <td><span class="rpe-dot rpe-${s.rpe}" title="RPE ${s.rpe}"></span></td>
+      <td>${s.weight > 0 ? s.weight + ' kg' : '—'}${bandDot}</td>
+      <td>${rpeEmoji}</td>
       <td><button class="btn-delete-set" data-ex="${idx}" data-set="${si}">×</button></td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 
   card.innerHTML = `
     <div class="exercise-card-header">
@@ -587,6 +625,59 @@ function updateStats() {
 // ============================================================
 //  MODAL: AGGIUNGI ESERCIZIO
 // ============================================================
+// ============================================================
+//  REPS PICKER
+// ============================================================
+function initRepsPicker(pickerId, inputId) {
+  const picker = document.getElementById(pickerId);
+  const input  = document.getElementById(inputId);
+  if (!picker || !input) return;
+
+  picker.innerHTML = Array.from({ length: 30 }, (_, i) => {
+    const n = i + 1;
+    return `<div class="reps-tile" data-val="${n}">${n}</div>`;
+  }).join('');
+
+  picker.addEventListener('click', e => {
+    const tile = e.target.closest('.reps-tile');
+    if (!tile) return;
+    picker.querySelectorAll('.reps-tile').forEach(t => t.classList.remove('selected'));
+    tile.classList.add('selected');
+    input.value = tile.dataset.val;
+  });
+
+  input.addEventListener('input', () => {
+    picker.querySelectorAll('.reps-tile').forEach(t => t.classList.remove('selected'));
+  });
+}
+
+function resetRepsPicker(pickerId, inputId) {
+  const picker = document.getElementById(pickerId);
+  if (!picker) return;
+  picker.querySelectorAll('.reps-tile').forEach(t => t.classList.remove('selected'));
+  if (inputId) { const el = document.getElementById(inputId); if (el) el.value = ''; }
+  requestAnimationFrame(() => {
+    const tile8 = picker.querySelector('[data-val="8"]');
+    if (tile8) picker.scrollLeft = tile8.offsetLeft - 4;
+  });
+}
+
+// ============================================================
+//  BAND COLOR PICKER
+// ============================================================
+function showBandColorPicker(pickerId, type) {
+  const el = document.getElementById(pickerId);
+  if (!el) return;
+  el.classList.toggle('hidden', type !== 'band');
+  if (type !== 'band') el.querySelectorAll('.band-color-btn').forEach(b => b.classList.remove('selected'));
+}
+
+function selectBandColor(pickerId, color) {
+  document.querySelectorAll(`#${pickerId} .band-color-btn`).forEach(b => {
+    b.classList.toggle('selected', b.dataset.color === color);
+  });
+}
+
 async function loadExerciseCache() {
   if (state.exerciseCache) return state.exerciseCache;
   try {
@@ -666,35 +757,20 @@ function closeQuickSheet() {
   setTimeout(() => sheet.classList.add('hidden'), 300);
 }
 
-function quickAddExercise(id, name, muscleGroup, type, reps, weight) {
+function quickAddExercise(id, name, muscleGroup, type) {
   closeQuickSheet();
-
-  if (!reps || reps < 1) {
-    document.getElementById('set-reps').value   = '';
-    document.getElementById('set-weight').value = '';
-    state.addExercise.rpe = 3;
-    selectExercise(id, name, muscleGroup, type);
-    setRPE('rpe-selector', 3);
-    modalAdd.showModal();
-    return;
-  }
-
-  state.session.exercises.push({
-    exerciseId:  id,
-    name,
-    muscleGroup,
-    type,
-    sets: [{ reps, weight, rpe: 3 }]
-  });
-
-  renderExercises();
-  startRest(60);
-  checkPRAndCelebrate(id, name, weight, reps);
+  document.getElementById('set-weight').value = '';
+  state.addExercise.rpe       = 'medio';
+  state.addExercise.bandColor = null;
+  selectExercise(id, name, muscleGroup, type);  // also resets picker + band
+  setRPE('rpe-selector', 'medio');
+  modalAdd.showModal();
 }
 
 function openAddModal() {
-  state.addExercise.selected = null;
-  state.addExercise.rpe = 3;
+  state.addExercise.selected  = null;
+  state.addExercise.rpe       = 'medio';
+  state.addExercise.bandColor = null;
 
   document.getElementById('exercise-search').value = '';
   document.getElementById('search-results').innerHTML = '';
@@ -703,11 +779,12 @@ function openAddModal() {
   document.getElementById('new-ex-muscle').value  = '';
   document.getElementById('new-ex-notes').value   = '';
   document.querySelector('input[name="new-ex-type"][value="bodyweight"]').checked = true;
-  document.getElementById('set-reps').value   = '';
   document.getElementById('set-weight').value = '';
 
+  showBandColorPicker('band-color-set', 'none');
+  resetRepsPicker('reps-picker-set', 'set-reps');
   showStep('step-search');
-  setRPE('rpe-selector', 3);
+  setRPE('rpe-selector', 'medio');
   modalAdd.showModal();
   loadExerciseCache();
 }
@@ -745,7 +822,8 @@ function filterExercises(q) {
 }
 
 function selectExercise(id, name, muscleGroup, type) {
-  state.addExercise.selected = { id, name, muscleGroup, type };
+  state.addExercise.selected  = { id, name, muscleGroup, type };
+  state.addExercise.bandColor = null;
 
   document.getElementById('selected-ex-info').innerHTML = `
     <span class="ex-type-icon">${equipIcon(type)}</span>
@@ -755,9 +833,9 @@ function selectExercise(id, name, muscleGroup, type) {
   document.getElementById('set-weight-label').textContent = weightLabel(type);
   document.getElementById('set-weight').placeholder = { bodyweight: '0', band: '3', kettlebell: '16' }[type] || '0';
 
+  showBandColorPicker('band-color-set', type);
+  resetRepsPicker('reps-picker-set', 'set-reps');
   showStep('step-add-set');
-
-  // Pre-carica il record in background così è pronto per il check PR
   preloadRecord(id);
 }
 
@@ -800,12 +878,15 @@ async function confirmAddExercise() {
   if (!ex)               { alert('Seleziona un esercizio'); return; }
   if (!reps || reps < 1) { alert('Inserisci le ripetizioni'); return; }
 
+  const set1 = { reps, weight, rpe: state.addExercise.rpe || 'medio' };
+  if (state.addExercise.bandColor) set1.bandColor = state.addExercise.bandColor;
+
   state.session.exercises.push({
     exerciseId:  ex.id,
     name:        ex.name,
     muscleGroup: ex.muscleGroup,
     type:        ex.type,
-    sets:        [{ reps, weight, rpe }]
+    sets:        [set1]
   });
 
   modalAdd.close();
@@ -821,14 +902,17 @@ async function confirmAddExercise() {
 // ============================================================
 function openAddSetModal(idx) {
   state.addSet.exerciseIndex = idx;
-  state.addSet.rpe = 3;
+  state.addSet.rpe           = 'medio';
+  state.addSet.bandColor     = null;
 
   const ex = state.session.exercises[idx];
-  document.getElementById('modal-set-title').textContent      = ex.name;
-  document.getElementById('addset-reps').value                = '';
-  document.getElementById('addset-weight').value              = '';
-  document.getElementById('addset-weight-label').textContent  = weightLabel(ex.type);
-  setRPE('addset-rpe-selector', 3);
+  document.getElementById('modal-set-title').textContent    = ex.name;
+  document.getElementById('addset-weight').value            = '';
+  document.getElementById('addset-weight-label').textContent = weightLabel(ex.type);
+
+  resetRepsPicker('reps-picker-addset', 'addset-reps');
+  showBandColorPicker('band-color-addset', ex.type);
+  setRPE('addset-rpe-selector', 'medio');
   modalSet.showModal();
 }
 
@@ -840,7 +924,10 @@ async function confirmAddSet() {
 
   if (!reps || reps < 1) { alert('Inserisci le ripetizioni'); return; }
 
-  state.session.exercises[idx].sets.push({ reps, weight, rpe });
+  const newSet = { reps, weight, rpe: state.addSet.rpe || 'medio' };
+  if (state.addSet.bandColor) newSet.bandColor = state.addSet.bandColor;
+
+  state.session.exercises[idx].sets.push(newSet);
   modalSet.close();
   renderExercises();
   startRest(60);
@@ -855,7 +942,7 @@ async function confirmAddSet() {
 // ============================================================
 function setRPE(selectorId, value) {
   document.querySelectorAll(`#${selectorId} .rpe-btn`).forEach(btn => {
-    btn.classList.toggle('active', +btn.dataset.rpe === value);
+    btn.classList.toggle('active', btn.dataset.rpe === String(value));
   });
 }
 
@@ -915,16 +1002,31 @@ document.getElementById('btn-quick-altro').addEventListener('click', () => {
 document.getElementById('quick-ex-grid').addEventListener('click', e => {
   const btn = e.target.closest('.quick-ex-btn');
   if (!btn) return;
-  quickAddExercise(
-    btn.dataset.id, btn.dataset.name, btn.dataset.muscle,
-    btn.dataset.type, +btn.dataset.reps, +btn.dataset.weight
-  );
+  quickAddExercise(btn.dataset.id, btn.dataset.name, btn.dataset.muscle, btn.dataset.type);
+});
+
+// Band color pickers
+document.getElementById('band-color-set').addEventListener('click', e => {
+  const btn = e.target.closest('.band-color-btn');
+  if (!btn) return;
+  state.addExercise.bandColor = btn.dataset.color;
+  selectBandColor('band-color-set', btn.dataset.color);
+});
+document.getElementById('band-color-addset').addEventListener('click', e => {
+  const btn = e.target.closest('.band-color-btn');
+  if (!btn) return;
+  state.addSet.bandColor = btn.dataset.color;
+  selectBandColor('band-color-addset', btn.dataset.color);
 });
 
 // Modal aggiungi esercizio
 document.getElementById('btn-close-add').addEventListener('click',   () => modalAdd.close());
 document.getElementById('btn-new-exercise').addEventListener('click', showNewExerciseForm);
-document.getElementById('btn-back-search').addEventListener('click',  () => showStep('step-search'));
+document.getElementById('btn-back-search').addEventListener('click', () => {
+  resetRepsPicker('reps-picker-set', 'set-reps');
+  showBandColorPicker('band-color-set', 'none');
+  showStep('step-search');
+});
 document.getElementById('btn-proceed-new').addEventListener('click',  proceedNewExercise);
 document.getElementById('btn-confirm-add').addEventListener('click',  confirmAddExercise);
 
@@ -941,7 +1043,7 @@ document.getElementById('search-results').addEventListener('click', e => {
 
 document.getElementById('rpe-selector').addEventListener('click', e => {
   const btn = e.target.closest('.rpe-btn');
-  if (btn) { state.addExercise.rpe = +btn.dataset.rpe; setRPE('rpe-selector', state.addExercise.rpe); }
+  if (btn) { state.addExercise.rpe = btn.dataset.rpe; setRPE('rpe-selector', state.addExercise.rpe); }
 });
 
 // Modal aggiungi serie
@@ -950,7 +1052,7 @@ document.getElementById('btn-confirm-set').addEventListener('click', confirmAddS
 
 document.getElementById('addset-rpe-selector').addEventListener('click', e => {
   const btn = e.target.closest('.rpe-btn');
-  if (btn) { state.addSet.rpe = +btn.dataset.rpe; setRPE('addset-rpe-selector', state.addSet.rpe); }
+  if (btn) { state.addSet.rpe = btn.dataset.rpe; setRPE('addset-rpe-selector', state.addSet.rpe); }
 });
 
 // Modal stop sessione
@@ -978,3 +1080,5 @@ document.getElementById('btn-rest-skip').addEventListener('click', stopRest);
 //  INIT
 // ============================================================
 initAudio();
+initRepsPicker('reps-picker-set',    'set-reps');
+initRepsPicker('reps-picker-addset', 'addset-reps');

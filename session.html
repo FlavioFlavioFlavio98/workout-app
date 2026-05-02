@@ -177,24 +177,32 @@
         <div id="selected-ex-info" class="selected-ex-info">
           <!-- Filled by JS -->
         </div>
-        <div class="grid-2">
-          <div class="field">
-            <label for="set-reps">Ripetizioni</label>
-            <input type="number" id="set-reps" min="1" max="999" placeholder="12" />
-          </div>
-          <div class="field">
-            <label for="set-weight" id="set-weight-label">Peso (kg)</label>
-            <input type="number" id="set-weight" min="0" step="0.5" placeholder="0" />
+        <div class="field">
+          <label>Ripetizioni</label>
+          <div class="reps-picker" id="reps-picker-set"></div>
+          <input type="number" id="set-reps" class="reps-manual" min="1" max="999" placeholder="Altro numero…" />
+        </div>
+        <div class="field">
+          <label for="set-weight" id="set-weight-label">Peso (kg)</label>
+          <input type="number" id="set-weight" min="0" step="0.5" placeholder="0" />
+        </div>
+        <div id="band-color-set" class="band-color-picker hidden">
+          <span class="band-color-label">Colore banda</span>
+          <div class="band-color-row">
+            <button class="band-color-btn" data-color="giallo" style="background:#FFD700" aria-label="Giallo"></button>
+            <button class="band-color-btn" data-color="verde"  style="background:#3DBE29" aria-label="Verde"></button>
+            <button class="band-color-btn" data-color="rosso"  style="background:#E53935" aria-label="Rosso"></button>
+            <button class="band-color-btn" data-color="blu"    style="background:#1E88E5" aria-label="Blu"></button>
+            <button class="band-color-btn" data-color="viola"  style="background:#8E24AA" aria-label="Viola"></button>
+            <button class="band-color-btn" data-color="nero"   style="background:#2A2A2A" aria-label="Nero"></button>
           </div>
         </div>
         <div class="field">
-          <label>Difficoltà percepita (RPE 1–5)</label>
+          <label>Difficoltà percepita</label>
           <div class="rpe-selector" id="rpe-selector">
-            <button class="rpe-btn" data-rpe="1">1</button>
-            <button class="rpe-btn" data-rpe="2">2</button>
-            <button class="rpe-btn" data-rpe="3">3</button>
-            <button class="rpe-btn" data-rpe="4">4</button>
-            <button class="rpe-btn" data-rpe="5">5</button>
+            <button class="rpe-btn" data-rpe="facile">🟢 Facile</button>
+            <button class="rpe-btn" data-rpe="medio">🟡 Medio</button>
+            <button class="rpe-btn" data-rpe="duro">🔴 Duro</button>
           </div>
         </div>
         <button class="btn btn-primary btn-full" id="btn-confirm-add">Aggiungi alla sessione</button>
@@ -212,24 +220,32 @@
       <button class="btn-close-modal" id="btn-close-set">✕</button>
     </div>
     <div class="modal-body">
-      <div class="grid-2">
-        <div class="field">
-          <label for="addset-reps">Ripetizioni</label>
-          <input type="number" id="addset-reps" min="1" placeholder="12" />
-        </div>
-        <div class="field">
-          <label for="addset-weight" id="addset-weight-label">Peso (kg)</label>
-          <input type="number" id="addset-weight" min="0" step="0.5" placeholder="0" />
+      <div class="field">
+        <label>Ripetizioni</label>
+        <div class="reps-picker" id="reps-picker-addset"></div>
+        <input type="number" id="addset-reps" class="reps-manual" min="1" max="999" placeholder="Altro numero…" />
+      </div>
+      <div class="field">
+        <label for="addset-weight" id="addset-weight-label">Peso (kg)</label>
+        <input type="number" id="addset-weight" min="0" step="0.5" placeholder="0" />
+      </div>
+      <div id="band-color-addset" class="band-color-picker hidden">
+        <span class="band-color-label">Colore banda</span>
+        <div class="band-color-row">
+          <button class="band-color-btn" data-color="giallo" style="background:#FFD700" aria-label="Giallo"></button>
+          <button class="band-color-btn" data-color="verde"  style="background:#3DBE29" aria-label="Verde"></button>
+          <button class="band-color-btn" data-color="rosso"  style="background:#E53935" aria-label="Rosso"></button>
+          <button class="band-color-btn" data-color="blu"    style="background:#1E88E5" aria-label="Blu"></button>
+          <button class="band-color-btn" data-color="viola"  style="background:#8E24AA" aria-label="Viola"></button>
+          <button class="band-color-btn" data-color="nero"   style="background:#2A2A2A" aria-label="Nero"></button>
         </div>
       </div>
       <div class="field">
-        <label>Difficoltà percepita (RPE 1–5)</label>
+        <label>Difficoltà percepita</label>
         <div class="rpe-selector" id="addset-rpe-selector">
-          <button class="rpe-btn" data-rpe="1">1</button>
-          <button class="rpe-btn" data-rpe="2">2</button>
-          <button class="rpe-btn" data-rpe="3">3</button>
-          <button class="rpe-btn" data-rpe="4">4</button>
-          <button class="rpe-btn" data-rpe="5">5</button>
+          <button class="rpe-btn" data-rpe="facile">🟢 Facile</button>
+          <button class="rpe-btn" data-rpe="medio">🟡 Medio</button>
+          <button class="rpe-btn" data-rpe="duro">🔴 Duro</button>
         </div>
       </div>
       <button class="btn btn-primary btn-full" id="btn-confirm-set">Aggiungi serie</button>

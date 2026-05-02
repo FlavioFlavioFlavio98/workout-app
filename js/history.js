@@ -16,6 +16,8 @@ const state = {
 // ============================================================
 //  UTILITY
 // ============================================================
+const BAND_COLORS = { giallo:'#FFD700', verde:'#3DBE29', rosso:'#E53935', blu:'#1E88E5', viola:'#8E24AA', nero:'#2A2A2A' };
+
 const MONTHS_IT  = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno',
                     'Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 const WEEKDAYS_IT = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
@@ -153,11 +155,21 @@ function buildCard(session) {
       ? `${nSets}×${maxReps} · ${maxWeight}kg`
       : `${nSets}×${maxReps}`;
 
+    const lastSet   = sets[sets.length - 1];
+    const rpeEmoji  = lastSet?.rpe
+      ? (typeof lastSet.rpe === 'string'
+         ? { facile:'🟢', medio:'🟡', duro:'🔴' }[lastSet.rpe] || ''
+         : ['','🟢','🟢','🟡','🔴','🔴'][lastSet.rpe] || '')
+      : '';
+    const bandDot = lastSet?.bandColor
+      ? `<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${BAND_COLORS[lastSet.bandColor]||'#888'};margin-left:3px;vertical-align:middle;" title="${lastSet.bandColor}"></span>`
+      : '';
+
     return `
       <div class="session-exercise-row">
         <span class="badge ${badgeClass(ex.muscleGroup)}">${ex.muscleGroup || '—'}</span>
-        <span class="session-ex-name">${ex.name}</span>
-        <span class="session-ex-sets">${setsLabel}${exVol > 0 ? ' · <strong>' + exVol.toFixed(0) + 'kg</strong>' : ''}</span>
+        <span class="session-ex-name">${ex.name}${bandDot}</span>
+        <span class="session-ex-sets">${setsLabel}${exVol > 0 ? ' · <strong>' + exVol.toFixed(0) + 'kg</strong>' : ''}${rpeEmoji ? ' ' + rpeEmoji : ''}</span>
       </div>`;
   }).join('');
 
