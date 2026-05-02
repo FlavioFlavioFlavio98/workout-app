@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workout App — Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       NAVIGAZIONE PRINCIPALE
+       Nav bar fissa in basso con 5 voci:
+       Dashboard | Sessione | Storico | Stats | Esercizi
+       ============================================================ -->
+  <nav id="main-nav">
+    <a href="index.html"     class="nav-item active"><span class="nav-icon">🏠</span><span>Home</span></a>
+    <a href="session.html"   class="nav-item"><span class="nav-icon">▶️</span><span>Sessione</span></a>
+    <a href="history.html"   class="nav-item"><span class="nav-icon">📋</span><span>Storico</span></a>
+    <a href="stats.html"     class="nav-item"><span class="nav-icon">📊</span><span>Stats</span></a>
+    <a href="exercises.html" class="nav-item"><span class="nav-icon">💪</span><span>Esercizi</span></a>
+  </nav>
+
+  <main id="dashboard">
+
+    <!-- ============================================================
+         HEADER
+         Saluto dinamico (Buongiorno / Buonasera) + data odierna
+         ============================================================ -->
+    <header id="dashboard-header">
+      <!-- TODO: testo "Buongiorno, Flavio" + data -->
+    </header>
+
+    <!-- ============================================================
+         RIEPILOGO RAPIDO OGGI
+         Mostra quante sessioni già fatte oggi e volume totale
+         ============================================================ -->
+    <section id="today-summary">
+      <!-- TODO: numero sessioni oggi, durata totale, volume totale (kg) -->
+    </section>
+
+    <!-- ============================================================
+         BOTTONE AVVIA SESSIONE
+         CTA principale — porta a session.html
+         ============================================================ -->
+    <section id="start-session">
+      <!-- TODO: bottone grande "Inizia sessione", eventuale sessione in corso -->
+    </section>
+
+    <!-- ============================================================
+         STREAK & MOTIVAZIONE
+         Striscia di allenamenti consecutivi (giorni)
+         ============================================================ -->
+    <section id="streak">
+      <!-- TODO: contatore giorni consecutivi, badge milestone -->
+    </section>
+
+    <!-- ============================================================
+         ULTIMI PERSONAL RECORD
+         Mostra gli ultimi 3 PR aggiornati
+         ============================================================ -->
+    <section id="recent-records">
+      <!-- TODO: lista PR con nome esercizio, valore, data -->
+    </section>
+
+    <!-- ============================================================
+         ANTEPRIMA PROSSIMA SESSIONE
+         Suggerisce quale gruppo muscolare allenare oggi
+         basandosi sulla frequenza e sull'ultimo allenamento
+         ============================================================ -->
+    <section id="next-session-hint">
+      <!-- TODO: logica "Ultimo allenamento X giorni fa per [gruppo]" -->
+    </section>
+
+  </main>
+
+  <!-- Firebase SDK (versione compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+
+  <!-- TODO: script dashboard inline o file js/dashboard.js -->
+
+</body>
+</html>

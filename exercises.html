@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workout App — Libreria Esercizi</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <nav id="main-nav">
+    <a href="index.html"     class="nav-item"><span class="nav-icon">🏠</span><span>Home</span></a>
+    <a href="session.html"   class="nav-item"><span class="nav-icon">▶️</span><span>Sessione</span></a>
+    <a href="history.html"   class="nav-item"><span class="nav-icon">📋</span><span>Storico</span></a>
+    <a href="stats.html"     class="nav-item"><span class="nav-icon">📊</span><span>Stats</span></a>
+    <a href="exercises.html" class="nav-item active"><span class="nav-icon">💪</span><span>Esercizi</span></a>
+  </nav>
+
+  <main id="exercises-page">
+
+    <!-- ============================================================
+         INTESTAZIONE + RICERCA
+         Barra di ricerca per nome esercizio.
+         Filtri: tipo attrezzatura (corpo libero / banda / kettlebell)
+                 e gruppo muscolare.
+         ============================================================ -->
+    <header id="exercises-header">
+      <!-- TODO: input ricerca testuale -->
+      <!-- TODO: chip/toggle filtro tipo attrezzatura -->
+      <!-- TODO: chip/toggle filtro gruppo muscolare -->
+    </header>
+
+    <!-- ============================================================
+         PULSANTE AGGIUNGI ESERCIZIO
+         Apre il form/modal per creare un nuovo esercizio
+         nella libreria personale.
+         ============================================================ -->
+    <section id="add-exercise-cta">
+      <!-- TODO: bottone "+ Nuovo esercizio" -->
+    </section>
+
+    <!-- ============================================================
+         GRIGLIA / LISTA ESERCIZI
+         Ogni card mostra:
+         - Nome esercizio
+         - Gruppo muscolare (badge colorato)
+         - Tipo attrezzatura (icona)
+         - Ultimo PR
+         - Pulsanti: Modifica / Elimina / Vedi progressione
+         ============================================================ -->
+    <section id="exercise-grid">
+      <!-- TODO: generata dinamicamente da Firestore (collezione exercises/) -->
+
+      <!-- Struttura card singolo esercizio (da replicare in JS):
+      <article class="exercise-card">
+        <header>
+          <span class="exercise-name">Push-up</span>
+          <span class="badge badge-chest">Petto</span>
+        </header>
+        <p class="exercise-type">Corpo libero</p>
+        <p class="exercise-pr">PR: 3×20</p>
+        <p class="exercise-notes">Note progressione...</p>
+        <footer>
+          <button class="btn-edit">Modifica</button>
+          <button class="btn-progress">Progressione</button>
+          <button class="btn-delete">Elimina</button>
+        </footer>
+      </article>
+      -->
+    </section>
+
+    <!-- ============================================================
+         MODAL / FORM CREAZIONE-MODIFICA ESERCIZIO
+         Nascosto di default, appare al click su "Nuovo esercizio"
+         o "Modifica". Campi:
+         - Nome (testo)
+         - Gruppo muscolare (select)
+         - Tipo attrezzatura (radio)
+         - Note sulla progressione (textarea)
+         ============================================================ -->
+    <dialog id="exercise-modal">
+      <!-- TODO: form con i campi sopra, pulsanti Salva / Annulla -->
+    </dialog>
+
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/exercises.js"></script>
+
+</body>
+</html>

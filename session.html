@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workout App — Sessione Attiva</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- Navigazione bottom bar -->
+  <nav id="main-nav">
+    <a href="index.html"     class="nav-item"><span class="nav-icon">🏠</span><span>Home</span></a>
+    <a href="session.html"   class="nav-item active"><span class="nav-icon">▶️</span><span>Sessione</span></a>
+    <a href="history.html"   class="nav-item"><span class="nav-icon">📋</span><span>Storico</span></a>
+    <a href="stats.html"     class="nav-item"><span class="nav-icon">📊</span><span>Stats</span></a>
+    <a href="exercises.html" class="nav-item"><span class="nav-icon">💪</span><span>Esercizi</span></a>
+  </nav>
+
+  <main id="session-page">
+
+    <!-- Timer header -->
+    <section id="session-header">
+      <div id="timer-display">00:00:00</div>
+      <div id="session-status">Premi Inizia per cominciare</div>
+      <div id="timer-controls">
+        <button id="btn-start" class="btn btn-success btn-full">▶ Inizia sessione</button>
+        <button id="btn-stop"  class="btn btn-danger  btn-full hidden">⬛ Termina sessione</button>
+      </div>
+    </section>
+
+    <!-- Contatori rapidi -->
+    <section id="session-stats-bar" class="hidden">
+      <div class="stat-chip"><div class="stat-value" id="stat-exercises">0</div><div class="stat-label">Esercizi</div></div>
+      <div class="stat-chip"><div class="stat-value" id="stat-sets">0</div><div class="stat-label">Serie</div></div>
+      <div class="stat-chip"><div class="stat-value" id="stat-volume">0</div><div class="stat-label">Volume kg</div></div>
+    </section>
+
+    <!-- Lista esercizi della sessione -->
+    <section id="exercise-list">
+      <div id="exercise-list-empty" class="empty-state hidden">
+        <div class="empty-icon">🏋️</div>
+        <p>Aggiungi il primo esercizio<br>con il pulsante <strong>+</strong></p>
+      </div>
+    </section>
+
+    <!-- Note sessione -->
+    <section id="session-notes-section" class="hidden">
+      <label for="notes-input">Note sessione</label>
+      <textarea id="notes-input" placeholder="Come ti senti oggi? Meteo, stato fisico, ecc."></textarea>
+    </section>
+
+  </main>
+
+  <!-- FAB aggiungi esercizio -->
+  <button id="btn-add-exercise" class="hidden" aria-label="Aggiungi esercizio">+</button>
+
+  <!-- Rest timer panel -->
+  <div id="rest-timer-panel" class="hidden">
+    <div class="rest-display" id="rest-display">01:00</div>
+    <div class="rest-presets">
+      <button class="btn btn-ghost btn-sm" data-seconds="30">30s</button>
+      <button class="btn btn-ghost btn-sm" data-seconds="60">60s</button>
+      <button class="btn btn-ghost btn-sm" data-seconds="90">90s</button>
+      <button class="btn btn-ghost btn-sm" data-seconds="120">2 min</button>
+    </div>
+    <div class="rest-controls">
+      <button id="btn-rest-minus" class="btn btn-ghost btn-sm">−15s</button>
+      <button id="btn-rest-skip"  class="btn btn-accent btn-full btn-sm">Salta riposo</button>
+      <button id="btn-rest-plus"  class="btn btn-ghost btn-sm">+15s</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL: Aggiungi esercizio (3 step in uno)
+       Step 1: ricerca nella libreria
+       Step 2: crea nuovo esercizio (opzionale)
+       Step 3: aggiungi prima serie
+       ============================================================ -->
+  <dialog id="modal-add-exercise">
+    <div class="modal-header">
+      <h2 id="modal-add-title">Aggiungi esercizio</h2>
+      <button class="btn-close-modal" id="btn-close-add">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- STEP 1: Ricerca -->
+      <div id="step-search">
+        <div class="field">
+          <label for="exercise-search">Cerca nella libreria</label>
+          <input type="text" id="exercise-search" placeholder="es. Push-up, Squat..." autocomplete="off" />
+        </div>
+        <ul id="search-results"></ul>
+        <button class="btn btn-ghost btn-full btn-sm" id="btn-new-exercise" style="margin-top:4px;">
+          + Crea nuovo esercizio
+        </button>
+      </div>
+
+      <!-- STEP 2: Nuovo esercizio -->
+      <div id="step-new-exercise" class="hidden">
+        <button class="btn btn-ghost btn-sm" id="btn-back-search" style="align-self:flex-start;margin-bottom:4px;">← Torna alla ricerca</button>
+        <div class="field">
+          <label for="new-ex-name">Nome esercizio</label>
+          <input type="text" id="new-ex-name" placeholder="es. Push-up" />
+        </div>
+        <div class="field">
+          <label for="new-ex-muscle">Gruppo muscolare</label>
+          <select id="new-ex-muscle">
+            <option value="">Seleziona...</option>
+            <option value="petto">Petto</option>
+            <option value="schiena">Schiena</option>
+            <option value="spalle">Spalle</option>
+            <option value="bicipiti">Bicipiti</option>
+            <option value="tricipiti">Tricipiti</option>
+            <option value="core">Core</option>
+            <option value="gambe">Gambe</option>
+            <option value="glutei">Glutei</option>
+            <option value="full body">Full body</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Attrezzatura</label>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="new-ex-type" id="type-bw"   value="bodyweight" checked /><label for="type-bw">🏃 Corpo libero</label></div>
+            <div class="radio-pill"><input type="radio" name="new-ex-type" id="type-band" value="band" /><label for="type-band">↔️ Banda elastica</label></div>
+            <div class="radio-pill"><input type="radio" name="new-ex-type" id="type-kb"   value="kettlebell" /><label for="type-kb">🏋️ Kettlebell</label></div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="new-ex-notes">Note progressione (opz.)</label>
+          <textarea id="new-ex-notes" placeholder="es. Aumenta reps prima di aumentare il peso..." style="min-height:60px;"></textarea>
+        </div>
+        <button class="btn btn-primary btn-full" id="btn-proceed-new">Procedi →</button>
+      </div>
+
+      <!-- STEP 3: Aggiungi prima serie -->
+      <div id="step-add-set" class="hidden">
+        <div id="selected-ex-info" class="selected-ex-info">
+          <!-- Filled by JS -->
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="set-reps">Ripetizioni</label>
+            <input type="number" id="set-reps" min="1" max="999" placeholder="12" />
+          </div>
+          <div class="field">
+            <label for="set-weight" id="set-weight-label">Peso (kg)</label>
+            <input type="number" id="set-weight" min="0" step="0.5" placeholder="0" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Difficoltà percepita (RPE 1–5)</label>
+          <div class="rpe-selector" id="rpe-selector">
+            <button class="rpe-btn" data-rpe="1">1</button>
+            <button class="rpe-btn" data-rpe="2">2</button>
+            <button class="rpe-btn" data-rpe="3">3</button>
+            <button class="rpe-btn" data-rpe="4">4</button>
+            <button class="rpe-btn" data-rpe="5">5</button>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" id="btn-confirm-add">Aggiungi alla sessione</button>
+      </div>
+
+    </div>
+  </dialog>
+
+  <!-- ============================================================
+       MODAL: Aggiungi serie a esercizio esistente
+       ============================================================ -->
+  <dialog id="modal-add-set">
+    <div class="modal-header">
+      <h2 id="modal-set-title">Aggiungi serie</h2>
+      <button class="btn-close-modal" id="btn-close-set">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid-2">
+        <div class="field">
+          <label for="addset-reps">Ripetizioni</label>
+          <input type="number" id="addset-reps" min="1" placeholder="12" />
+        </div>
+        <div class="field">
+          <label for="addset-weight" id="addset-weight-label">Peso (kg)</label>
+          <input type="number" id="addset-weight" min="0" step="0.5" placeholder="0" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Difficoltà percepita (RPE 1–5)</label>
+        <div class="rpe-selector" id="addset-rpe-selector">
+          <button class="rpe-btn" data-rpe="1">1</button>
+          <button class="rpe-btn" data-rpe="2">2</button>
+          <button class="rpe-btn" data-rpe="3">3</button>
+          <button class="rpe-btn" data-rpe="4">4</button>
+          <button class="rpe-btn" data-rpe="5">5</button>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" id="btn-confirm-set">Aggiungi serie</button>
+    </div>
+  </dialog>
+
+  <!-- ============================================================
+       MODAL: Conferma fine sessione
+       ============================================================ -->
+  <dialog id="modal-stop">
+    <div class="modal-header">
+      <h2>Termina sessione?</h2>
+      <button class="btn-close-modal" id="btn-cancel-stop">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="text-muted" style="font-size:14px;">La sessione verrà salvata su Firestore con tutti gli esercizi.</p>
+      <div id="stop-summary"></div>
+      <div style="display:flex;gap:10px;margin-top:4px;">
+        <button class="btn btn-ghost btn-full" id="btn-cancel-stop-2">Annulla</button>
+        <button class="btn btn-danger btn-full" id="btn-confirm-stop">Salva e termina</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Firebase CDN -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/session.js"></script>
+
+</body>
+</html>

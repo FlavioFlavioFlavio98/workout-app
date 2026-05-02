@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workout App — Statistiche</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- Chart.js per i grafici -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <nav id="main-nav">
+    <a href="index.html"     class="nav-item"><span class="nav-icon">🏠</span><span>Home</span></a>
+    <a href="session.html"   class="nav-item"><span class="nav-icon">▶️</span><span>Sessione</span></a>
+    <a href="history.html"   class="nav-item"><span class="nav-icon">📋</span><span>Storico</span></a>
+    <a href="stats.html"     class="nav-item active"><span class="nav-icon">📊</span><span>Stats</span></a>
+    <a href="exercises.html" class="nav-item"><span class="nav-icon">💪</span><span>Esercizi</span></a>
+  </nav>
+
+  <main id="stats-page">
+
+    <!-- ============================================================
+         FILTRO PERIODO
+         Selettore per il range temporale dei grafici:
+         Ultima settimana / Ultimo mese / Ultimi 3 mesi / Tutto
+         ============================================================ -->
+    <section id="period-filter">
+      <!-- TODO: toggle buttons settimana / mese / 3 mesi / tutto -->
+    </section>
+
+    <!-- ============================================================
+         CARD METRICHE GLOBALI
+         Numeri in evidenza: sessioni totali, volume totale,
+         media sessioni/settimana, esercizi unici eseguiti
+         ============================================================ -->
+    <section id="global-metrics">
+      <!-- TODO: 4 card KPI -->
+    </section>
+
+    <!-- ============================================================
+         GRAFICO VOLUME NEL TEMPO
+         Linea o barre per volume totale (kg) per sessione.
+         Asse X: date, Asse Y: kg sollevati.
+         ============================================================ -->
+    <section id="chart-volume">
+      <h2>Volume nel tempo</h2>
+      <canvas id="volumeChart"></canvas>
+      <!-- TODO: js/stats.js costruisce il dataset da Firestore -->
+    </section>
+
+    <!-- ============================================================
+         GRAFICO FREQUENZA PER GRUPPO MUSCOLARE
+         Donut/pie chart: quante sessioni per ogni gruppo muscolare
+         nel periodo selezionato.
+         ============================================================ -->
+    <section id="chart-muscle-frequency">
+      <h2>Frequenza per gruppo muscolare</h2>
+      <canvas id="muscleChart"></canvas>
+    </section>
+
+    <!-- ============================================================
+         GRAFICO PROGRESSIONE ESERCIZIO
+         Seleziona un esercizio dalla libreria e mostra:
+         - Peso massimo per sessione nel tempo
+         - Volume per sessione nel tempo
+         ============================================================ -->
+    <section id="chart-exercise-progress">
+      <h2>Progressione esercizio</h2>
+      <!-- TODO: select per scegliere esercizio -->
+      <canvas id="progressChart"></canvas>
+    </section>
+
+    <!-- ============================================================
+         PERSONAL RECORD
+         Tabella con il PR (peso max, reps max, volume max)
+         per ogni esercizio eseguito almeno una volta.
+         ============================================================ -->
+    <section id="personal-records">
+      <h2>Personal Record</h2>
+      <!-- TODO: tabella ordinabile per nome / data / valore -->
+    </section>
+
+    <!-- ============================================================
+         GRAFICO RPE MEDIO
+         Mostra la difficoltà percepita media per sessione:
+         utile per capire andamento fatica e recupero.
+         ============================================================ -->
+    <section id="chart-rpe">
+      <h2>Difficoltà percepita (RPE medio)</h2>
+      <canvas id="rpeChart"></canvas>
+    </section>
+
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/stats.js"></script>
+
+</body>
+</html>

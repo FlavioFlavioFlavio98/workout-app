@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workout App — Storico</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <nav id="main-nav">
+    <a href="index.html"     class="nav-item"><span class="nav-icon">🏠</span><span>Home</span></a>
+    <a href="session.html"   class="nav-item"><span class="nav-icon">▶️</span><span>Sessione</span></a>
+    <a href="history.html"   class="nav-item active"><span class="nav-icon">📋</span><span>Storico</span></a>
+    <a href="stats.html"     class="nav-item"><span class="nav-icon">📊</span><span>Stats</span></a>
+    <a href="exercises.html" class="nav-item"><span class="nav-icon">💪</span><span>Esercizi</span></a>
+  </nav>
+
+  <main id="history-page">
+
+    <!-- ============================================================
+         INTESTAZIONE + FILTRI
+         Permette di filtrare per intervallo di date o gruppo
+         muscolare. Di default mostra le ultime 30 sessioni.
+         ============================================================ -->
+    <header id="history-header">
+      <!-- TODO: titolo "Storico sessioni" -->
+      <!-- TODO: filtro per data (settimana / mese / tutto) -->
+      <!-- TODO: filtro per gruppo muscolare -->
+    </header>
+
+    <!-- ============================================================
+         CALENDARIO / HEATMAP
+         Vista mensile che mostra i giorni con sessioni registrate,
+         colorate per volume o intensità.
+         ============================================================ -->
+    <section id="session-calendar">
+      <!-- TODO: griglia giorni del mese -->
+      <!-- TODO: punto/dot colorato sui giorni con sessioni -->
+      <!-- TODO: click su giorno → scroll alla sessione corrispondente -->
+    </section>
+
+    <!-- ============================================================
+         LISTA SESSIONI
+         Ogni sessione è una card con:
+         - Data e ora di inizio
+         - Durata totale
+         - Lista esercizi (collassabile)
+         - Volume totale della sessione
+         ============================================================ -->
+    <section id="session-list">
+      <!-- TODO: generata dinamicamente da Firestore -->
+      <!-- TODO: ordinata per data decrescente -->
+      <!-- TODO: paginazione o infinite scroll -->
+
+      <!-- Struttura card singola sessione (da replicare in JS):
+      <article class="session-card">
+        <header>
+          <span class="session-date">Lunedì 28 apr 2025 · 07:15</span>
+          <span class="session-duration">42 min</span>
+        </header>
+        <ul class="exercise-summary">
+          (esercizi...)
+        </ul>
+        <footer>
+          <span>Volume: 1.240 kg</span>
+          <button class="btn-delete">Elimina</button>
+        </footer>
+      </article>
+      -->
+    </section>
+
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/history.js"></script>
+
+</body>
+</html>

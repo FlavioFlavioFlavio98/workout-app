@@ -1,0 +1,472 @@
+/* ============================================================
+   WORKOUT APP — STILE GLOBALE
+   ============================================================ */
+
+:root {
+  --bg:          #0f1117;
+  --surface:     #1c1f2e;
+  --surface2:    #252840;
+  --primary:     #4f8ef7;
+  --accent:      #f7974f;
+  --success:     #4fc97a;
+  --danger:      #f74f4f;
+  --text:        #e8eaf0;
+  --muted:       #7a7f9a;
+  --border:      #2e3248;
+  --radius:      12px;
+  --radius-sm:   8px;
+  --nav-h:       60px;
+  --ease:        0.18s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ============================================================
+   NAVIGAZIONE BOTTOM
+   ============================================================ */
+#main-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 100;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+  transition: color var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-item.active,
+.nav-item:hover { color: var(--primary); }
+.nav-icon { font-size: 19px; line-height: 1; }
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+main {
+  padding: 16px 16px calc(var(--nav-h) + 16px);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   BOTTONI
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 13px 20px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity var(--ease), transform var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(0.96); opacity: 0.85; }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-success { background: var(--success); color: #0f1117; }
+.btn-danger  { background: var(--danger);  color: #fff; }
+.btn-accent  { background: var(--accent);  color: #0f1117; }
+.btn-ghost   { background: transparent; color: var(--text); border: 1px solid var(--border); }
+
+.btn-sm   { padding: 8px 13px; font-size: 13px; border-radius: 7px; }
+.btn-full { width: 100%; }
+
+/* ============================================================
+   FORM ELEMENTS
+   ============================================================ */
+.field { display: flex; flex-direction: column; gap: 6px; }
+
+.field label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 16px;
+  padding: 12px 14px;
+  outline: none;
+  transition: border-color var(--ease);
+  -webkit-appearance: none;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+textarea { resize: vertical; min-height: 80px; }
+
+/* Select arrow */
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%237a7f9a' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+/* Radio pills (tipo attrezzatura) */
+.radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.radio-pill input { display: none; }
+.radio-pill label {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all var(--ease);
+}
+.radio-pill input:checked + label {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+/* RPE selector */
+.rpe-selector { display: flex; gap: 8px; }
+.rpe-btn {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--ease);
+}
+.rpe-btn.active[data-rpe="1"] { background: #4fc97a; color: #0f1117; border-color: #4fc97a; }
+.rpe-btn.active[data-rpe="2"] { background: #a8d74f; color: #0f1117; border-color: #a8d74f; }
+.rpe-btn.active[data-rpe="3"] { background: #f7d14f; color: #0f1117; border-color: #f7d14f; }
+.rpe-btn.active[data-rpe="4"] { background: #f7974f; color: #0f1117; border-color: #f7974f; }
+.rpe-btn.active[data-rpe="5"] { background: #f74f4f; color: #fff;    border-color: #f74f4f; }
+
+/* ============================================================
+   BADGE GRUPPO MUSCOLARE
+   ============================================================ */
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.badge-petto      { background: #4f8ef722; color: #4f8ef7; }
+.badge-schiena    { background: #a84ff722; color: #a84ff7; }
+.badge-spalle     { background: #4fc97a22; color: #4fc97a; }
+.badge-bicipiti   { background: #f7974f22; color: #f7974f; }
+.badge-tricipiti  { background: #f74f9622; color: #f74f96; }
+.badge-core       { background: #f7d14f22; color: #f7d14f; }
+.badge-gambe      { background: #4ff7d122; color: #4ff7d1; }
+.badge-glutei     { background: #f74f4f22; color: #f74f4f; }
+.badge-fullbody   { background: #7a7f9a22; color: #7a7f9a; }
+
+/* ============================================================
+   SESSION PAGE — TIMER HEADER
+   ============================================================ */
+#session-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 0 12px;
+  text-align: center;
+}
+
+#timer-display {
+  font-size: 60px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  color: var(--text);
+}
+#timer-display.running { color: var(--success); }
+
+#session-status {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+#timer-controls { display: flex; gap: 10px; width: 100%; }
+
+/* ============================================================
+   STATS BAR
+   ============================================================ */
+#session-stats-bar {
+  display: flex;
+  gap: 10px;
+  margin: 14px 0;
+}
+.stat-chip {
+  flex: 1;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  padding: 10px 8px;
+  text-align: center;
+}
+.stat-value { font-size: 22px; font-weight: 700; color: var(--primary); }
+.stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+
+/* ============================================================
+   EXERCISE CARDS
+   ============================================================ */
+.exercise-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.exercise-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 14px;
+}
+.ex-type-icon { font-size: 17px; flex-shrink: 0; }
+.ex-name { flex: 1; font-size: 15px; font-weight: 600; }
+.btn-delete-exercise {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  font-size: 15px;
+  line-height: 1;
+  border-radius: 6px;
+}
+.btn-delete-exercise:hover { color: var(--danger); background: #f74f4f15; }
+
+.exercise-card-body { padding: 0 14px 14px; }
+
+/* Sets table */
+.sets-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 14px; }
+.sets-table th {
+  text-align: left;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0 8px 8px 0;
+}
+.sets-table td { padding: 7px 8px 7px 0; vertical-align: middle; }
+.sets-table tr + tr td { border-top: 1px solid var(--border); }
+.set-num { color: var(--muted); font-size: 12px; width: 22px; }
+.rpe-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+.rpe-1 { background: #4fc97a; } .rpe-2 { background: #a8d74f; }
+.rpe-3 { background: #f7d14f; } .rpe-4 { background: #f7974f; }
+.rpe-5 { background: #f74f4f; }
+
+.btn-delete-set {
+  background: none; border: none;
+  color: var(--muted); cursor: pointer;
+  padding: 4px 6px; font-size: 16px; line-height: 1;
+}
+.btn-delete-set:hover { color: var(--danger); }
+
+.card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ============================================================
+   FAB (+ Aggiungi esercizio)
+   ============================================================ */
+#btn-add-exercise {
+  position: fixed;
+  bottom: calc(var(--nav-h) + 14px);
+  right: 16px;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 30px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(79,142,247,0.45);
+  transition: transform var(--ease), box-shadow var(--ease);
+  z-index: 50;
+  -webkit-tap-highlight-color: transparent;
+}
+#btn-add-exercise:active { transform: scale(0.90); }
+
+/* ============================================================
+   DIALOG / MODAL (bottom sheet)
+   ============================================================ */
+dialog {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius) var(--radius) 0 0;
+  color: var(--text);
+  padding: 0;
+  width: 100%;
+  max-width: 600px;
+  margin: auto auto 0;
+  max-height: 92vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+dialog::backdrop { background: rgba(0,0,0,0.65); backdrop-filter: blur(3px); }
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 0;
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 1;
+}
+.modal-header h2 { font-size: 17px; font-weight: 700; }
+.btn-close-modal {
+  background: none; border: none;
+  color: var(--muted); font-size: 22px;
+  cursor: pointer; line-height: 1; padding: 4px 8px;
+}
+
+.modal-body {
+  padding: 16px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Search results */
+#search-results {
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: none;
+  margin-top: -6px;
+}
+#search-results.visible { display: block; }
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px;
+  cursor: pointer;
+  transition: background var(--ease);
+}
+.search-result-item:hover { background: var(--surface2); }
+.search-result-item + .search-result-item { border-top: 1px solid var(--border); }
+.search-result-item .ex-name { flex: 1; font-size: 15px; }
+.no-results { padding: 12px 13px; color: var(--muted); font-size: 14px; }
+
+/* Selected exercise info */
+.selected-ex-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--surface2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.selected-ex-info .ex-name { flex: 1; font-weight: 600; font-size: 15px; }
+
+/* 2-column grid for reps/weight */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ============================================================
+   REST TIMER PANEL
+   ============================================================ */
+#rest-timer-panel {
+  position: fixed;
+  bottom: var(--nav-h);
+  left: 0; right: 0;
+  background: var(--surface);
+  border-top: 2px solid var(--primary);
+  padding: 14px 16px;
+  z-index: 80;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.rest-display {
+  text-align: center;
+  font-size: 44px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--primary);
+  line-height: 1;
+  margin-bottom: 10px;
+}
+.rest-presets { display: flex; gap: 7px; justify-content: center; margin-bottom: 10px; }
+.rest-controls { display: flex; gap: 8px; }
+
+/* ============================================================
+   SESSION NOTES
+   ============================================================ */
+#session-notes-section {
+  margin-top: 4px;
+}
+#session-notes-section label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 7px;
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.empty-state {
+  text-align: center;
+  padding: 36px 20px;
+  color: var(--muted);
+}
+.empty-icon { font-size: 46px; margin-bottom: 10px; }
+.empty-state p { font-size: 14px; line-height: 1.5; }
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+.hidden { display: none !important; }
+.text-muted { color: var(--muted); }
+.text-success { color: var(--success); }
+.text-danger { color: var(--danger); }
+.divider { height: 1px; background: var(--border); margin: 6px 0; }
