@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workout App — Sessione Attiva</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0f1117" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Workout" />
+  <link rel="apple-touch-icon" href="icons/icon.svg" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -53,12 +59,17 @@
       <div class="voice-note-section">
         <div class="voice-note-header">
           <span class="voice-note-label">Nota vocale</span>
-          <button id="btn-mic" class="btn-mic" title="Avvia/ferma registrazione" aria-label="Registra nota vocale">🎤</button>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span id="voice-rec-time" class="voice-rec-time hidden">00:00</span>
+            <button id="btn-mic" class="btn-mic" title="Avvia/ferma registrazione" aria-label="Registra nota vocale">🎤</button>
+          </div>
         </div>
-        <div id="voice-interim" class="voice-interim hidden">In ascolto…</div>
-        <textarea id="voice-note-input" placeholder="Trascrizione automatica — modificabile dopo la registrazione" style="min-height:72px;"></textarea>
+        <div id="voice-status" class="voice-status hidden"></div>
+        <div id="voice-player" class="voice-player hidden">
+          <audio id="voice-audio" controls preload="none"></audio>
+        </div>
         <p id="voice-not-supported" class="voice-not-supported hidden">
-          ⚠️ Riconoscimento vocale non disponibile su questo browser.
+          ⚠️ Registrazione audio non disponibile su questo browser.
         </p>
       </div>
     </section>
@@ -81,6 +92,21 @@
       <button id="btn-rest-minus" class="btn btn-ghost btn-sm">−15s</button>
       <button id="btn-rest-skip"  class="btn btn-accent btn-full btn-sm">Salta riposo</button>
       <button id="btn-rest-plus"  class="btn btn-ghost btn-sm">+15s</button>
+    </div>
+  </div>
+
+  <!-- Quick-add bottom sheet -->
+  <div id="quick-add-sheet" class="hidden">
+    <div id="quick-add-backdrop"></div>
+    <div id="quick-add-panel">
+      <div class="quick-add-header">
+        <span class="quick-add-title">Aggiungi esercizio</span>
+        <button id="btn-close-quick" class="btn-close-modal" aria-label="Chiudi">✕</button>
+      </div>
+      <div id="quick-ex-grid">
+        <div class="quick-loading">Caricamento…</div>
+      </div>
+      <button id="btn-quick-altro" class="btn btn-ghost btn-full" style="margin-top:6px;">+ Altro / nuovo esercizio</button>
     </div>
   </div>
 
@@ -245,8 +271,10 @@
   <!-- Firebase CDN -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
   <script src="js/firebase-config.js"></script>
   <script src="js/session.js"></script>
+  <script src="js/pwa.js"></script>
 
 </body>
 </html>

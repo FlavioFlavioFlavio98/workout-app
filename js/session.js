@@ -5,10 +5,11 @@
 // ============================================================
 const state = {
   session: {
-    id:        null,
-    startTime: null,
-    isActive:  false,
-    exercises: []
+    id:           null,
+    startTime:    null,
+    isActive:     false,
+    exercises:    [],
+    voiceNoteUrl: null
   },
   timer: {
     intervalId:     null,
@@ -31,11 +32,17 @@ const state = {
   recordsCache:  {}    // { exerciseId: { maxWeight, maxReps, bestVolume } }
 };
 
-// Voice note state (separato per chiarezza)
-const voice = {
-  recognition: null,
-  isListening:  false,
-  supported:    !!(window.SpeechRecognition || window.webkitSpeechRecognition)
+// Quick-add recent exercises cache
+const quickAdd = { recent: null };
+
+// Audio voice note state
+const audio = {
+  mediaRecorder: null,
+  chunks:        [],
+  isRecording:   false,
+  timerInterval: null,
+  elapsedSec:    0,
+  supported:     !!(navigator.mediaDevices && window.MediaRecorder)
 };
 
 // ============================================================
@@ -57,8 +64,6 @@ const elNotes        = document.getElementById('notes-input');
 const elRestPanel    = document.getElementById('rest-timer-panel');
 const elRestDisplay  = document.getElementById('rest-display');
 const elBtnMic       = document.getElementById('btn-mic');
-const elInterim      = document.getElementById('voice-interim');
-const elVoiceNote    = document.getElementById('voice-note-input');
 
 const modalAdd  = document.getElementById('modal-add-exercise');
 const modalSet  = document.getElementById('modal-add-set');
@@ -117,96 +122,125 @@ function playBeep() {
 }
 
 // ============================================================
-//  VOICE NOTE — Web Speech API
+//  AUDIO VOICE NOTE — MediaRecorder API
 // ============================================================
-function initVoice() {
-  if (!voice.supported) {
+function initAudio() {
+  if (!audio.supported) {
     elBtnMic.classList.add('hidden');
     document.getElementById('voice-not-supported').classList.remove('hidden');
+  }
+}
+
+function toggleRecording() {
+  if (audio.isRecording) stopRecording(true);
+  else startRecording();
+}
+
+async function startRecording() {
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+      alert('Permesso microfono negato.\nAbilita il microfono nelle impostazioni di Chrome.');
+    } else {
+      alert('Impossibile accedere al microfono: ' + err.message);
+    }
     return;
   }
 
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  voice.recognition = new SR();
-  voice.recognition.continuous     = true;
-  voice.recognition.interimResults  = true;
-  voice.recognition.lang            = 'it-IT';
-  voice.recognition.maxAlternatives = 1;
+  audio.chunks     = [];
+  audio.elapsedSec = 0;
 
-  voice.recognition.onresult = (event) => {
-    let interimText = '';
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const transcript = event.results[i][0].transcript;
-      if (event.results[i].isFinal) {
-        // Appende alla textarea nota vocale
-        const cur = elVoiceNote.value.trim();
-        elVoiceNote.value = cur ? cur + ' ' + transcript.trim() : transcript.trim();
-        elInterim.textContent = '';
-      } else {
-        interimText += transcript;
-      }
-    }
-    if (interimText) elInterim.textContent = interimText;
+  const mimeType = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4']
+    .find(t => MediaRecorder.isTypeSupported(t)) || '';
+
+  try {
+    audio.mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+  } catch (_) {
+    audio.mediaRecorder = new MediaRecorder(stream);
+  }
+
+  audio.mediaRecorder.ondataavailable = e => {
+    if (e.data && e.data.size > 0) audio.chunks.push(e.data);
+  };
+  audio.mediaRecorder.onstop = () => {
+    stream.getTracks().forEach(t => t.stop());
+    handleRecordingComplete();
   };
 
-  voice.recognition.onerror = (event) => {
-    // 'no-speech' è normale (pausa) — lascia gestire a onend
-    if (event.error === 'no-speech') return;
-    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-      alert('Permesso microfono negato.\nAbilita il microfono nelle impostazioni di Chrome.');
-      stopVoice();
-      return;
-    }
-    if (event.error === 'network') {
-      alert('Il riconoscimento vocale richiede connessione internet.');
-      stopVoice();
-      return;
-    }
-    console.warn('Speech error:', event.error);
-  };
+  audio.mediaRecorder.start(500);
+  audio.isRecording = true;
 
-  // Su Chrome/Android recognition si ferma dopo qualche secondo di silenzio.
-  // Se siamo ancora in "listening mode" la riavviamo.
-  voice.recognition.onend = () => {
-    if (voice.isListening) {
-      setTimeout(() => {
-        if (voice.isListening) {
-          try { voice.recognition.start(); }
-          catch (_) { stopVoice(); }
-        }
-      }, 120);
-    }
-  };
-}
+  const timeEl = document.getElementById('voice-rec-time');
+  timeEl.textContent = '00:00';
+  timeEl.classList.remove('hidden');
+  audio.timerInterval = setInterval(() => {
+    audio.elapsedSec++;
+    timeEl.textContent = fmtMS(audio.elapsedSec);
+  }, 1000);
 
-function toggleVoice() {
-  if (voice.isListening) stopVoice();
-  else startVoice();
-}
-
-function startVoice() {
-  voice.isListening = true;
   elBtnMic.classList.add('listening');
   elBtnMic.textContent = '⏹';
   elBtnMic.setAttribute('aria-label', 'Ferma registrazione');
-  elInterim.textContent = 'In ascolto…';
-  elInterim.classList.remove('hidden');
-  try {
-    voice.recognition.start();
-  } catch (e) {
-    console.error('Errore avvio riconoscimento:', e);
-    stopVoice();
+  setVoiceStatus('● Registrazione in corso…');
+}
+
+function stopRecording(save = true) {
+  if (!audio.mediaRecorder || !audio.isRecording) return;
+  clearInterval(audio.timerInterval);
+  document.getElementById('voice-rec-time').classList.add('hidden');
+  audio.isRecording = false;
+  elBtnMic.classList.remove('listening');
+  elBtnMic.textContent = '🎤';
+  elBtnMic.setAttribute('aria-label', 'Registra nota vocale');
+  if (save) {
+    setVoiceStatus('Elaborazione…');
+    audio.mediaRecorder.stop(); // → onstop → handleRecordingComplete
+  } else {
+    try { audio.mediaRecorder.stream.getTracks().forEach(t => t.stop()); } catch (_) {}
+    setVoiceStatus('');
   }
 }
 
-function stopVoice() {
-  voice.isListening = false;
-  elBtnMic.classList.remove('listening');
-  elBtnMic.textContent = '🎤';
-  elBtnMic.setAttribute('aria-label', 'Avvia registrazione');
-  elInterim.textContent = '';
-  elInterim.classList.add('hidden');
-  try { voice.recognition.stop(); } catch (_) {}
+async function handleRecordingComplete() {
+  const mimeType = audio.mediaRecorder?.mimeType || 'audio/webm';
+  const blob     = new Blob(audio.chunks, { type: mimeType });
+
+  // Mostra player locale subito
+  const localUrl = URL.createObjectURL(blob);
+  showVoicePlayer(localUrl);
+  setVoiceStatus('Caricamento su Firebase…');
+
+  try {
+    const ext  = mimeType.includes('ogg') ? 'ogg' : mimeType.includes('mp4') ? 'm4a' : 'webm';
+    const path = `voice-notes/${state.session.id || ('tmp_' + Date.now())}_${Date.now()}.${ext}`;
+    const ref  = storage.ref(path);
+    await ref.put(blob, { contentType: mimeType });
+    const url  = await ref.getDownloadURL();
+    state.session.voiceNoteUrl = url;
+    const audioEl = document.getElementById('voice-audio');
+    if (audioEl) audioEl.src = url;
+    setVoiceStatus('Nota vocale salvata ✓');
+    setTimeout(() => setVoiceStatus(''), 2500);
+  } catch (e) {
+    state.session.voiceNoteUrl = localUrl;
+    setVoiceStatus('⚠ Salvato in locale — attivo fino alla chiusura della pagina');
+    console.warn('Storage upload fallito:', e);
+  }
+}
+
+function showVoicePlayer(url) {
+  const player  = document.getElementById('voice-player');
+  const audioEl = document.getElementById('voice-audio');
+  audioEl.src = url;
+  player.classList.remove('hidden');
+}
+
+function setVoiceStatus(msg) {
+  const el = document.getElementById('voice-status');
+  el.textContent = msg;
+  el.classList.toggle('hidden', !msg);
 }
 
 // ============================================================
@@ -397,8 +431,7 @@ async function startSession() {
 
 function requestStop() {
   if (!state.session.isActive) return;
-  // Ferma la registrazione vocale se attiva
-  if (voice.isListening) stopVoice();
+  if (audio.isRecording) stopRecording(true);
 
   const vol = calcVolume();
   document.getElementById('stop-summary').innerHTML = `
@@ -433,8 +466,8 @@ async function confirmStop() {
     endTime:   firebase.firestore.Timestamp.fromDate(endTime),
     duration:  state.timer.elapsedSeconds,
     exercises: state.session.exercises,
-    notes:     elNotes.value.trim(),
-    voiceNote: elVoiceNote.value.trim()   // ← nota vocale salvata separatamente
+    notes:        elNotes.value.trim(),
+    voiceNoteUrl: state.session.voiceNoteUrl || ''
   };
 
   try {
@@ -563,6 +596,100 @@ async function loadExerciseCache() {
     state.exerciseCache = [];
   }
   return state.exerciseCache;
+}
+
+// ============================================================
+//  QUICK-ADD BOTTOM SHEET
+// ============================================================
+async function loadRecentExercises() {
+  if (quickAdd.recent !== null) return quickAdd.recent;
+  try {
+    const snap = await db.collection('sessions').orderBy('date', 'desc').limit(10).get();
+    const seen  = new Map();
+    snap.docs.forEach(doc => {
+      (doc.data().exercises || []).forEach(ex => {
+        if (!ex.exerciseId || ex.exerciseId.startsWith('local_')) return;
+        if (seen.has(ex.exerciseId)) return;
+        const lastSet = ex.sets?.[ex.sets.length - 1];
+        seen.set(ex.exerciseId, {
+          id:          ex.exerciseId,
+          name:        ex.name,
+          muscleGroup: ex.muscleGroup,
+          type:        ex.type,
+          lastReps:    lastSet?.reps   || 0,
+          lastWeight:  lastSet?.weight || 0
+        });
+      });
+    });
+    quickAdd.recent = [...seen.values()].slice(0, 10);
+  } catch (_) {
+    quickAdd.recent = [];
+  }
+  // Pre-carica i record PR in background
+  quickAdd.recent.forEach(ex => preloadRecord(ex.id));
+  return quickAdd.recent;
+}
+
+function openQuickSheet() {
+  const sheet = document.getElementById('quick-add-sheet');
+  const grid  = document.getElementById('quick-ex-grid');
+
+  grid.innerHTML = '<div class="quick-loading">Caricamento…</div>';
+  sheet.classList.remove('hidden');
+  requestAnimationFrame(() => sheet.classList.add('open'));
+
+  loadRecentExercises().then(exercises => {
+    if (!exercises.length) {
+      grid.innerHTML = '<p class="quick-ex-empty">Nessun esercizio recente.<br>Usa "+ Altro" per aggiungere.</p>';
+      return;
+    }
+    grid.innerHTML = exercises.map(ex => {
+      const vals = [
+        ex.lastReps   > 0 ? ex.lastReps + ' rip'  : '',
+        ex.lastWeight > 0 ? ex.lastWeight + ' kg'  : ''
+      ].filter(Boolean).join(' · ');
+      return `
+        <button class="quick-ex-btn"
+                data-id="${ex.id}" data-name="${ex.name}"
+                data-muscle="${ex.muscleGroup}" data-type="${ex.type}"
+                data-reps="${ex.lastReps}" data-weight="${ex.lastWeight}">
+          <span class="quick-ex-name">${ex.name}</span>
+          ${vals ? `<span class="quick-ex-vals">${vals}</span>` : ''}
+        </button>`;
+    }).join('');
+  });
+}
+
+function closeQuickSheet() {
+  const sheet = document.getElementById('quick-add-sheet');
+  sheet.classList.remove('open');
+  setTimeout(() => sheet.classList.add('hidden'), 300);
+}
+
+function quickAddExercise(id, name, muscleGroup, type, reps, weight) {
+  closeQuickSheet();
+
+  if (!reps || reps < 1) {
+    document.getElementById('set-reps').value   = '';
+    document.getElementById('set-weight').value = '';
+    state.addExercise.rpe = 3;
+    selectExercise(id, name, muscleGroup, type);
+    setRPE('rpe-selector', 3);
+    modalAdd.showModal();
+    return;
+  }
+
+  state.session.exercises.push({
+    exerciseId:  id,
+    name,
+    muscleGroup,
+    type,
+    sets: [{ reps, weight, rpe: 3 }]
+  });
+
+  renderExercises();
+  startRest(60);
+  checkPRAndCelebrate(id, name, weight, reps);
 }
 
 function openAddModal() {
@@ -750,11 +877,11 @@ window.addEventListener('beforeunload', e => {
 elBtnStart.addEventListener('click', startSession);
 elBtnStop.addEventListener('click',  requestStop);
 
-// FAB
-elBtnFAB.addEventListener('click', openAddModal);
+// FAB → quick-add sheet
+elBtnFAB.addEventListener('click', openQuickSheet);
 
 // Microfono nota vocale
-elBtnMic.addEventListener('click', toggleVoice);
+elBtnMic.addEventListener('click', toggleRecording);
 
 // Delegazione lista esercizi
 elExList.addEventListener('click', e => {
@@ -776,6 +903,22 @@ elExList.addEventListener('click', e => {
     state.session.exercises[+delSetBtn.dataset.ex].sets.splice(+delSetBtn.dataset.set, 1);
     renderExercises();
   }
+});
+
+// Quick-add sheet
+document.getElementById('quick-add-backdrop').addEventListener('click', closeQuickSheet);
+document.getElementById('btn-close-quick').addEventListener('click',    closeQuickSheet);
+document.getElementById('btn-quick-altro').addEventListener('click', () => {
+  closeQuickSheet();
+  openAddModal();
+});
+document.getElementById('quick-ex-grid').addEventListener('click', e => {
+  const btn = e.target.closest('.quick-ex-btn');
+  if (!btn) return;
+  quickAddExercise(
+    btn.dataset.id, btn.dataset.name, btn.dataset.muscle,
+    btn.dataset.type, +btn.dataset.reps, +btn.dataset.weight
+  );
 });
 
 // Modal aggiungi esercizio
@@ -834,4 +977,4 @@ document.getElementById('btn-rest-skip').addEventListener('click', stopRest);
 // ============================================================
 //  INIT
 // ============================================================
-initVoice();
+initAudio();

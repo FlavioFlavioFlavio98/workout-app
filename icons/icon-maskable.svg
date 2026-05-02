@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Full bleed background (no rounded corners — maskable safe zone is inner 80%) -->
+  <rect width="512" height="512" fill="#1c1f2e"/>
+  <!-- Bar -->
+  <rect x="192" y="236" width="128" height="40" rx="8" fill="#4f8ef7"/>
+  <!-- Left plate -->
+  <rect x="132" y="200" width="64" height="112" rx="14" fill="#4f8ef7"/>
+  <!-- Right plate -->
+  <rect x="316" y="200" width="64" height="112" rx="14" fill="#4f8ef7"/>
+  <!-- Left cap -->
+  <rect x="108" y="222" width="40" height="68" rx="10" fill="#4fc97a"/>
+  <!-- Right cap -->
+  <rect x="364" y="222" width="40" height="68" rx="10" fill="#4fc97a"/>
+</svg>

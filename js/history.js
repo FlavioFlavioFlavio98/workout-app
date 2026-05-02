@@ -165,7 +165,12 @@ function buildCard(session) {
     ? `<div class="session-notes-text">"${session.notes}"</div>`
     : '';
 
-  const voiceNoteHtml = session.voiceNote
+  const voiceNoteHtml = session.voiceNoteUrl
+    ? `<div class="session-voice-note">
+         <span class="voice-note-icon">🎤</span>
+         <audio controls src="${session.voiceNoteUrl}" preload="none" style="flex:1;min-width:0;height:36px;"></audio>
+       </div>`
+    : session.voiceNote
     ? `<div class="session-voice-note"><span class="voice-note-icon">🎤</span>${session.voiceNote}</div>`
     : '';
 
