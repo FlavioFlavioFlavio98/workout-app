@@ -165,6 +165,10 @@ function buildCard(session) {
     ? `<div class="session-notes-text">"${session.notes}"</div>`
     : '';
 
+  const voiceNoteHtml = session.voiceNote
+    ? `<div class="session-voice-note"><span class="voice-note-icon">🎤</span>${session.voiceNote}</div>`
+    : '';
+
   const volStr = volume > 0 ? ` · ${volume.toFixed(0)} kg` : '';
 
   card.innerHTML = `
@@ -182,6 +186,7 @@ function buildCard(session) {
     <div class="session-card-body hidden">
       ${exRows || '<p class="text-muted" style="font-size:13px;padding:8px 0;">Nessun esercizio registrato</p>'}
       ${notesHtml}
+      ${voiceNoteHtml}
       <div class="session-card-footer">
         <button class="btn btn-danger btn-sm btn-del" data-id="${session.id}">Elimina sessione</button>
       </div>

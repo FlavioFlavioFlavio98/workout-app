@@ -44,10 +44,23 @@
       </div>
     </section>
 
-    <!-- Note sessione -->
+    <!-- Note sessione + nota vocale -->
     <section id="session-notes-section" class="hidden">
-      <label for="notes-input">Note sessione</label>
+      <label for="notes-input" style="display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">Note sessione</label>
       <textarea id="notes-input" placeholder="Come ti senti oggi? Meteo, stato fisico, ecc."></textarea>
+
+      <!-- Nota vocale -->
+      <div class="voice-note-section">
+        <div class="voice-note-header">
+          <span class="voice-note-label">Nota vocale</span>
+          <button id="btn-mic" class="btn-mic" title="Avvia/ferma registrazione" aria-label="Registra nota vocale">🎤</button>
+        </div>
+        <div id="voice-interim" class="voice-interim hidden">In ascolto…</div>
+        <textarea id="voice-note-input" placeholder="Trascrizione automatica — modificabile dopo la registrazione" style="min-height:72px;"></textarea>
+        <p id="voice-not-supported" class="voice-not-supported hidden">
+          ⚠️ Riconoscimento vocale non disponibile su questo browser.
+        </p>
+      </div>
     </section>
 
   </main>
@@ -214,6 +227,20 @@
       </div>
     </div>
   </dialog>
+
+  <!-- PR Celebration overlay -->
+  <div id="pr-overlay" class="hidden" role="dialog" aria-live="assertive">
+    <div class="pr-card">
+      <div class="pr-trophy">🏆</div>
+      <div class="pr-headline">Nuovo Personal Record!</div>
+      <div class="pr-ex-label">Esercizio</div>
+      <div class="pr-ex-name" id="pr-ex-name"></div>
+      <div class="pr-value">
+        <span id="pr-value-num"></span>
+        <span class="pr-value-unit" id="pr-value-unit"></span>
+      </div>
+    </div>
+  </div>
 
   <!-- Firebase CDN -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
