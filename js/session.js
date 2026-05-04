@@ -15,11 +15,6 @@ const state = {
     intervalId:     null,
     elapsedSeconds: 0
   },
-  rest: {
-    intervalId:       null,
-    remainingSeconds: 0,
-    isActive:         false
-  },
   addExercise: {
     selected:  null,
     rpe:       'medio',
@@ -69,8 +64,6 @@ const elStatSets     = document.getElementById('stat-sets');
 const elStatVol      = document.getElementById('stat-volume');
 const elNotesSection = document.getElementById('session-notes-section');
 const elNotes        = document.getElementById('notes-input');
-const elRestPanel    = document.getElementById('rest-timer-panel');
-const elRestDisplay  = document.getElementById('rest-display');
 const elBtnMic       = document.getElementById('btn-mic');
 
 const modalAdd  = document.getElementById('modal-add-exercise');
@@ -488,7 +481,6 @@ function requestStop() {
 async function confirmStop() {
   modalStop.close();
   clearInterval(state.timer.intervalId);
-  stopRest();
   releaseWakeLock();
 
   const endTime  = new Date();
@@ -528,35 +520,6 @@ async function confirmStop() {
 }
 
 // ============================================================
-//  REST TIMER
-// ============================================================
-function startRest(seconds) {
-  stopRest();
-  state.rest.remainingSeconds = seconds;
-  state.rest.isActive = true;
-  elRestPanel.classList.remove('hidden');
-  updateRestDisplay();
-  state.rest.intervalId = setInterval(() => {
-    state.rest.remainingSeconds--;
-    updateRestDisplay();
-    if (state.rest.remainingSeconds <= 0) { stopRest(); playBeep(); }
-  }, 1000);
-}
-
-function stopRest() {
-  clearInterval(state.rest.intervalId);
-  state.rest.isActive = false;
-  state.rest.remainingSeconds = 0;
-  elRestPanel.classList.add('hidden');
-}
-
-function updateRestDisplay() {
-  const s = Math.max(0, state.rest.remainingSeconds);
-  elRestDisplay.textContent = fmtMS(s);
-  elRestDisplay.style.color = s <= 5 ? 'var(--danger)' : 'var(--primary)';
-}
-
-// ============================================================
 //  RENDER ESERCIZI
 // ============================================================
 function renderExercises() {
@@ -582,7 +545,18 @@ function buildCard(ex, idx) {
     const bandDot  = s.bandColor
       ? `<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${BAND_COLORS[s.bandColor]||'#888'};margin-left:3px;vertical-align:middle;"></span>`
       : '';
-    return `
+
+    let gapRow = '';
+    if (si > 0 && s.addedAt && ex.sets[si - 1].addedAt) {
+      const diffSec = Math.floor((s.addedAt - ex.sets[si - 1].addedAt) / 1000);
+      if (diffSec >= 1) {
+        const mins = Math.floor(diffSec / 60), secs = diffSec % 60;
+        const label = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+        gapRow = `<tr class="set-time-gap"><td colspan="5">⏱ ${label}</td></tr>`;
+      }
+    }
+
+    return `${gapRow}
     <tr>
       <td class="set-num">${si + 1}</td>
       <td>${s.reps} rip</td>
@@ -608,8 +582,7 @@ function buildCard(ex, idx) {
         '<p class="text-muted" style="font-size:13px;margin-bottom:10px;">Nessuna serie aggiunta</p>'
       }
       <div class="card-actions">
-        <button class="btn btn-ghost btn-sm btn-add-set"    data-idx="${idx}">+ Aggiungi serie</button>
-        <button class="btn btn-ghost btn-sm btn-start-rest" data-idx="${idx}">⏱ Riposo 60s</button>
+        <button class="btn btn-ghost btn-sm btn-add-set" data-idx="${idx}">+ Aggiungi serie</button>
       </div>
     </div>`;
   return card;
@@ -878,7 +851,7 @@ async function confirmAddExercise() {
   if (!ex)               { alert('Seleziona un esercizio'); return; }
   if (!reps || reps < 1) { alert('Inserisci le ripetizioni'); return; }
 
-  const set1 = { reps, weight, rpe: state.addExercise.rpe || 'medio' };
+  const set1 = { reps, weight, rpe: state.addExercise.rpe || 'medio', addedAt: Date.now() };
   if (state.addExercise.bandColor) set1.bandColor = state.addExercise.bandColor;
 
   state.session.exercises.push({
@@ -891,7 +864,6 @@ async function confirmAddExercise() {
 
   modalAdd.close();
   renderExercises();
-  startRest(60);
 
   // Controlla PR in background (non blocca UI)
   checkPRAndCelebrate(ex.id, ex.name, weight, reps);
@@ -924,13 +896,12 @@ async function confirmAddSet() {
 
   if (!reps || reps < 1) { alert('Inserisci le ripetizioni'); return; }
 
-  const newSet = { reps, weight, rpe: state.addSet.rpe || 'medio' };
+  const newSet = { reps, weight, rpe: state.addSet.rpe || 'medio', addedAt: Date.now() };
   if (state.addSet.bandColor) newSet.bandColor = state.addSet.bandColor;
 
   state.session.exercises[idx].sets.push(newSet);
   modalSet.close();
   renderExercises();
-  startRest(60);
 
   // Controlla PR in background
   const ex = state.session.exercises[idx];
@@ -974,9 +945,6 @@ elBtnMic.addEventListener('click', toggleRecording);
 elExList.addEventListener('click', e => {
   const addSetBtn = e.target.closest('.btn-add-set');
   if (addSetBtn) { openAddSetModal(+addSetBtn.dataset.idx); return; }
-
-  const restBtn = e.target.closest('.btn-start-rest');
-  if (restBtn) { startRest(60); return; }
 
   const delExBtn = e.target.closest('.btn-delete-exercise');
   if (delExBtn && confirm('Rimuovere questo esercizio dalla sessione?')) {
@@ -1059,22 +1027,6 @@ document.getElementById('addset-rpe-selector').addEventListener('click', e => {
 document.getElementById('btn-cancel-stop').addEventListener('click',   () => modalStop.close());
 document.getElementById('btn-cancel-stop-2').addEventListener('click', () => modalStop.close());
 document.getElementById('btn-confirm-stop').addEventListener('click',  confirmStop);
-
-// Rest timer
-document.querySelectorAll('#rest-timer-panel [data-seconds]').forEach(btn => {
-  btn.addEventListener('click', () => startRest(+btn.dataset.seconds));
-});
-document.getElementById('btn-rest-minus').addEventListener('click', () => {
-  if (!state.rest.isActive) return;
-  state.rest.remainingSeconds = Math.max(5, state.rest.remainingSeconds - 15);
-  updateRestDisplay();
-});
-document.getElementById('btn-rest-plus').addEventListener('click', () => {
-  if (!state.rest.isActive) return;
-  state.rest.remainingSeconds += 15;
-  updateRestDisplay();
-});
-document.getElementById('btn-rest-skip').addEventListener('click', stopRest);
 
 // ============================================================
 //  INIT
