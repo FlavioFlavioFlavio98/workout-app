@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workout App — Impostazioni</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0f1117" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Workout" />
+  <link rel="apple-touch-icon" href="icons/icon.svg" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <nav id="main-nav">
+    <a href="index.html"     class="nav-item"><span class="nav-icon">🏠</span><span>Home</span></a>
+    <a href="session.html"   class="nav-item"><span class="nav-icon">▶️</span><span>Sessione</span></a>
+    <a href="history.html"   class="nav-item"><span class="nav-icon">📋</span><span>Storico</span></a>
+    <a href="stats.html"     class="nav-item"><span class="nav-icon">📊</span><span>Stats</span></a>
+    <a href="exercises.html" class="nav-item"><span class="nav-icon">💪</span><span>Esercizi</span></a>
+    <a href="settings.html"  class="nav-item active"><span class="nav-icon">⚙️</span><span>Impost.</span></a>
+  </nav>
+
+  <main id="settings-page">
+
+    <h1 class="page-title">Impostazioni</h1>
+
+    <!-- ── SEZIONE DATI ── -->
+    <p class="settings-section-label">Dati</p>
+    <div class="settings-card">
+
+      <div class="settings-item">
+        <div class="settings-item-body">
+          <div class="settings-item-title">Reimposta app</div>
+          <div class="settings-item-desc">Elimina definitivamente tutte le sessioni, gli esercizi della libreria e i personal record.</div>
+        </div>
+        <button id="btn-reset" class="btn btn-danger btn-sm" style="flex-shrink:0;">
+          🗑 Reimposta
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ── SEZIONE BACKUP ── -->
+    <p class="settings-section-label">Backup</p>
+    <div class="settings-card">
+
+      <div class="settings-item">
+        <div class="settings-item-body">
+          <div class="settings-item-title">Esporta dati</div>
+          <div class="settings-item-desc">Scarica un file JSON con tutte le sessioni, gli esercizi e i record. Usalo come backup o per migrare i dati.</div>
+        </div>
+        <button id="btn-export" class="btn btn-primary btn-sm" style="flex-shrink:0;">
+          ⬇ Esporta
+        </button>
+      </div>
+
+      <div class="settings-divider"></div>
+
+      <div class="settings-item">
+        <div class="settings-item-body">
+          <div class="settings-item-title">Importa dati</div>
+          <div class="settings-item-desc">Ripristina da un file di backup .json. I documenti esistenti verranno sovrascritti.</div>
+        </div>
+        <button id="btn-import" class="btn btn-ghost btn-sm" style="flex-shrink:0;">
+          ⬆ Importa
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ── INFO APP ── -->
+    <p class="settings-section-label">Info</p>
+    <div class="settings-card">
+      <div class="settings-item settings-item--info">
+        <span class="settings-info-label">Versione</span>
+        <span class="settings-info-value">1.0</span>
+      </div>
+      <div class="settings-divider"></div>
+      <div class="settings-item settings-item--info">
+        <span class="settings-info-label">Storage</span>
+        <span class="settings-info-value" id="storage-info">—</span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Input file nascosto per import -->
+  <input type="file" id="file-import" accept=".json" style="display:none;" />
+
+  <!-- Toast notifica -->
+  <div id="settings-toast" class="settings-toast" role="status" aria-live="polite"></div>
+
+  <!-- ============================================================
+       MODAL: Conferma reset
+       ============================================================ -->
+  <dialog id="modal-reset">
+    <div class="modal-header">
+      <h2>Reimposta app?</h2>
+      <button class="btn-close-modal" id="btn-close-reset">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="text-muted" style="font-size:14px;line-height:1.55;">
+        Sei sicuro? Questa azione eliminerà tutte le sessioni, gli esercizi e i record.<br>
+        <strong style="color:var(--danger);">Non è reversibile.</strong>
+      </p>
+      <div style="display:flex;gap:10px;margin-top:18px;">
+        <button class="btn btn-ghost btn-full" id="btn-cancel-reset">Annulla</button>
+        <button class="btn btn-danger btn-full" id="btn-confirm-reset">Conferma reset</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ============================================================
+       MODAL: Progresso importazione
+       ============================================================ -->
+  <dialog id="modal-import-progress">
+    <div class="modal-body" style="padding:28px 20px;text-align:center;">
+      <div style="font-size:18px;font-weight:700;margin-bottom:6px;">Importazione in corso…</div>
+      <div id="import-progress-text" style="font-size:13px;color:var(--muted);margin-bottom:16px;">0 / 0</div>
+      <progress id="import-progress-bar" class="import-progress" value="0" max="100"></progress>
+    </div>
+  </dialog>
+
+  <!-- Firebase CDN -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/pwa.js"></script>
+
+</body>
+</html>
